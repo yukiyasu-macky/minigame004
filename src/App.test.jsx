@@ -1,9 +1,12 @@
-import { expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import App from './App';
+// @vitest-environment jsdom
+import { expect, test } from "vitest";
+import { render, screen } from "@testing-library/react";
+import App from "./App";
 
-test('renders learn react link', () => {
+test("renders debt roguelike puzzle MVP", () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeDefined();
+
+  expect(screen.getByText("通常戦1")).toBeDefined();
+  expect(screen.getByText(/現在チェイン/)).toBeDefined();
+  expect(screen.getByText(/借金状態/)).toBeDefined();
 });
