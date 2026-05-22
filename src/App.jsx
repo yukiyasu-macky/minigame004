@@ -72,6 +72,15 @@ const CONTRACTS = [
   },
 ];
 
+const CONTRACT_ICON_LABELS = {
+  loanShark: "高",
+  runawayMana: "暴",
+  lifeCut: "命",
+  interestRefund: "還",
+  lazyDeal: "怠",
+  darkFinance: "闇",
+};
+
 const makePiece = () => PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)].id;
 
 const makeBoard = () => {
@@ -243,11 +252,127 @@ const initialGame = () => ({
   totalDebt: 0,
   contracts: [],
   contractChoices: [],
-  phase: "battle",
+  phase: "title",
   message: "同じ色を3つ以上なぞって利益を出そう。",
   lastTurn: null,
   settlement: null,
 });
+
+function GreedVisual() {
+  return (
+    <div className="titleVisual" aria-hidden="true">
+      <div className="magicRing" />
+      <div className="contractCard cardOne">
+        <span>契約</span>
+      </div>
+      <div className="contractCard cardTwo">
+        <span>利息</span>
+      </div>
+      <div className="greedFigure">
+        <div className="head" />
+        <div className="collar" />
+        <div className="body" />
+        <div className="arm leftArm" />
+        <div className="arm rightArm" />
+        <div className="hand" />
+      </div>
+      <div className="magicOrb orbOne" />
+      <div className="magicOrb orbTwo" />
+      <div className="magicOrb orbThree" />
+    </div>
+  );
+}
+
+function TitleDebtGauge({ debt }) {
+  const debtState = getDebtState(debt);
+  const marker = Math.min(100, (debt / MAX_DEBT) * 100);
+
+  return (
+    <div className="titleDebtGauge">
+      <div className="segmentedGauge">
+        <span className="segmentBlue" />
+        <span className="segmentYellow" />
+        <span className="segmentRed" />
+        <span className="segmentBlack" />
+        <em style={{ left: `${marker}%` }} />
+      </div>
+      <p>現在の状態：{debtState.label}（{debtState.description}）</p>
+    </div>
+  );
+}
+
+function TitleScreen({ game, currentStage, debtState, contractSummary, onStart, onReset }) {
+  const cash = game.totalProfit - game.totalDebt;
+
+  return (
+    <section className="titleScreen">
+      <div className="comicLogo" aria-label="貸した魔力はリボ払いで強制徴収">
+        <span className="logoLine">貸した魔力は</span>
+        <strong>
+          <mark>リボ払い</mark>で
+          <mark>強制徴収</mark>
+        </strong>
+      </div>
+      <p className="titleSubtitle">借金利益管理ローグライク・リンクパズルRPG</p>
+
+      <GreedVisual />
+      <p className="catchCopy">利息も元金も、逃げられないぜ。</p>
+
+      <button className="startButton" type="button" onClick={onStart}>
+        GAME START <span>→</span>
+      </button>
+
+      <section className="titleInfoPanel">
+        <div className="titleStat gold">
+          <span>総利益</span>
+          <strong>{formatMoney(game.totalProfit)}</strong>
+        </div>
+        <div className="titleStat red">
+          <span>総借金</span>
+          <strong>{formatMoney(game.totalDebt)}</strong>
+        </div>
+        <div className="titleStat cyan">
+          <span>所持金</span>
+          <strong>{formatMoney(cash)}</strong>
+        </div>
+        <div className="titleStat">
+          <span>プレイヤーHP</span>
+          <strong>{game.playerHp}/{PLAYER_MAX_HP}</strong>
+        </div>
+        <div className="titleStat">
+          <span>現在ステージ</span>
+          <strong>{game.stageIndex + 1}/6</strong>
+          <small>{currentStage.name}</small>
+        </div>
+        <div className="titleStat purple">
+          <span>所持契約</span>
+          <strong>{contractSummary}</strong>
+        </div>
+      </section>
+
+      <TitleDebtGauge debt={game.totalDebt} />
+
+      <section className="contractDock" aria-label="契約一覧">
+        {CONTRACTS.map((contract) => (
+          <div className="contractIcon" key={contract.id}>
+            <span>{CONTRACT_ICON_LABELS[contract.id]}</span>
+            <small>{contract.name}</small>
+          </div>
+        ))}
+      </section>
+
+      <footer className="titleFooter">
+        <button type="button" onClick={onStart}>次の戦闘へ</button>
+        <button type="button" onClick={onReset}>リスタート</button>
+        <span>Ver.0.1.0</span>
+      </footer>
+
+      <div className="titleStateBadge" style={{ borderColor: debtState.color }}>
+        {debtState.label}
+      </div>
+    </section>
+  );
+}
 
 export default function App() {
   const [game, setGame] = useState(() => initialGame());
@@ -272,6 +397,12 @@ export default function App() {
   );
 
   const resetGame = () => setGame(initialGame());
+  const startGame = () =>
+    setGame((current) => ({
+      ...current,
+      phase: "battle",
+      message: "同じ色を3つ以上なぞって利益を出そう。",
+    }));
 
   const getCellFromPoint = (clientX, clientY) => {
     const board = boardRef.current;
@@ -486,6 +617,17 @@ export default function App() {
   return (
     <main className={`app debt-${debtState.id}`}>
       <section className="phone">
+        {game.phase === "title" ? (
+          <TitleScreen
+            game={game}
+            currentStage={currentStage}
+            debtState={debtState}
+            contractSummary={contractSummary}
+            onStart={startGame}
+            onReset={resetGame}
+          />
+        ) : (
+          <>
         <header className="topHud">
           <div>
             <p className="eyebrow">STAGE {game.stageIndex + 1}/6</p>
@@ -674,6 +816,8 @@ export default function App() {
               </button>
             </div>
           </div>
+        )}
+          </>
         )}
       </section>
     </main>
