@@ -1339,7 +1339,7 @@ button {
   position: relative;
   height: 100%;
   display: grid;
-  grid-template-rows: 76px 150px 190px 50px 52px 58px 20px;
+  grid-template-rows: 76px 136px 52px minmax(190px, 1fr) 58px 20px;
   gap: 6px;
   overflow: hidden;
 }
@@ -1358,7 +1358,6 @@ button {
 .battleHeader,
 .battleHero,
 .puzzleZone,
-.battleTotals,
 .battleDebtRow,
 .battleFooter,
 .battleMessage {
@@ -1381,8 +1380,6 @@ button {
 .stageStack div,
 .enemyPanel,
 .playerPanel,
-.temptationCard,
-.previewCard,
 .bonusLadder,
 .chainSide > div,
 .chainSide button,
@@ -1406,8 +1403,6 @@ button {
 
 .stageStack span,
 .playerPanel span,
-.temptationCard small,
-.previewCard span,
 .bonusLadder strong,
 .chainSide span,
 .battleTotals span,
@@ -1428,7 +1423,6 @@ button {
 .stageStack em,
 .enemyPanel em,
 .playerPanel em,
-.previewCard em,
 .battleTotals em,
 .interestRate em,
 .endTurnButton span {
@@ -1523,7 +1517,7 @@ button {
 .battleHero {
   min-height: 0;
   display: grid;
-  grid-template-columns: 0.9fr 1fr 0.98fr;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: auto 1fr;
   gap: 6px;
   overflow: hidden;
@@ -1609,84 +1603,6 @@ button {
   box-shadow: 0 0 24px rgba(244, 248, 255, 0.32);
 }
 
-.temptationCard {
-  grid-column: 1;
-  grid-row: 2;
-  align-self: end;
-  display: grid;
-  gap: 2px;
-  padding: 8px;
-  color: var(--white);
-  text-align: center;
-}
-
-.temptationCard strong {
-  color: var(--profit-gold);
-  font-size: 20px;
-  line-height: 1;
-}
-
-.temptationCard span {
-  font-size: 13px;
-  font-weight: 1000;
-}
-
-.previewCard {
-  grid-column: 3;
-  grid-row: 2;
-  align-self: end;
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 2px 8px;
-  padding: 8px;
-  max-height: 92px;
-  overflow: hidden;
-}
-
-.previewCard > span {
-  grid-column: 1 / -1;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.previewCard > strong {
-  align-self: center;
-  color: var(--profit-gold);
-  font-size: 21px;
-  line-height: 0.95;
-  text-align: center;
-}
-
-.previewCard > strong em {
-  display: block;
-  color: var(--profit-gold);
-  font-size: 10px;
-}
-
-.previewCard dl {
-  display: grid;
-  gap: 1px;
-  margin: 0;
-}
-
-.previewCard div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.previewCard dt {
-  color: rgba(244, 248, 255, 0.76);
-  font-size: 8px;
-  font-weight: 900;
-}
-
-.previewCard dd {
-  margin: 0;
-  font-size: 10px;
-  font-weight: 1000;
-}
-
 .profitText {
   color: var(--profit-gold);
 }
@@ -1745,6 +1661,7 @@ button {
 }
 
 .board {
+  position: relative;
   width: min(100%, 190px);
   height: 190px;
   aspect-ratio: 1;
@@ -1762,6 +1679,71 @@ button {
     rgba(4, 12, 31, 0.74);
   background-size: calc(100% / 6) calc(100% / 6);
   box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.06), 0 0 22px rgba(77, 166, 255, 0.24);
+}
+
+.chainComparePopover {
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  z-index: 4;
+  width: min(78%, 156px);
+  max-height: 46px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 7px;
+  border: 1px solid rgba(126, 230, 255, 0.42);
+  border-radius: 9px;
+  padding: 5px 7px;
+  pointer-events: none;
+  background: rgba(3, 13, 33, 0.68);
+  box-shadow:
+    0 0 18px rgba(77, 166, 255, 0.38),
+    0 0 22px rgba(255, 77, 176, 0.18),
+    inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+  backdrop-filter: blur(7px);
+  transform: translateX(-50%);
+}
+
+.chainComparePopover > strong {
+  grid-column: 1 / -1;
+  color: var(--white);
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(255, 77, 176, 0.78);
+}
+
+.chainComparePopover div {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.chainComparePopover div:last-child {
+  text-align: right;
+}
+
+.chainComparePopover span {
+  color: var(--cyan);
+  font-size: 8px;
+  font-weight: 1000;
+}
+
+.chainComparePopover div:last-child span {
+  color: #ff7ad8;
+}
+
+.chainComparePopover b {
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .piece {
@@ -3680,14 +3662,6 @@ button {
   box-shadow: 0 0 24px rgba(255, 210, 74, 0.45), inset 0 0 0 1px rgba(244, 248, 255, 0.12);
   text-shadow: 0 0 12px rgba(255, 210, 74, 0.8);
   transform: translateX(-50%) rotate(-2deg);
-}
-
-.chainBonusBanner {
-  top: 170px;
-  color: var(--cyan);
-  border-color: rgba(126, 230, 255, 0.72);
-  font-size: 12px;
-  box-shadow: 0 0 18px rgba(126, 230, 255, 0.32);
 }
 
 @keyframes feverShake {
