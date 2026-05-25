@@ -32,28 +32,35 @@ const CHARACTERS = [
 ];
 
 const STAGES = [
-  { name: "通常戦1", hp: 100, attack: 5 },
-  { name: "通常戦2", hp: 150, attack: 7 },
+  { name: "通常戦1", hp: 100, attack: 5, rule: "チュートリアル。特殊ルールなし。" },
+  { name: "通常戦2", hp: 150, attack: 7, rule: "5チェイン以上で利益+100。" },
   { name: "税務執行者", type: "小ボス", hp: 500, attack: 15, interestRate: 0.1 },
-  { name: "通常戦4", hp: 220, attack: 10 },
-  { name: "通常戦5", hp: 300, attack: 12 },
+  { name: "通常戦4", hp: 220, attack: 10, rule: "8チェイン以上で利益+200、敵攻撃+10。" },
+  { name: "通常戦5", hp: 300, attack: 12, rule: "赤状態以上で勝利すると報酬4択。" },
   { name: "回収監査官", type: "中ボス", hp: 1200, attack: 25, interestRate: 0.25 },
-  { name: "通常戦7", hp: 500, attack: 18 },
-  { name: "通常戦8", hp: 700, attack: 22 },
+  { name: "通常戦7", hp: 500, attack: 18, rule: "10チェイン以上で追加ダメージ+500、借金+500。" },
+  { name: "通常戦8", hp: 700, attack: 22, rule: "黒状態で勝利すると最終利益+500。" },
   { name: "徴収王", type: "ラスボス", hp: 3000, attack: 40, final: true },
 ];
 
 const CONTRACTS = [
   { id: "loanShark", name: "高利貸し", icon: "高", text: "利益+50% / 借金+30%" },
   { id: "runawayMana", name: "暴走魔力", icon: "暴", text: "借金80%以上で利益+100%" },
-  { id: "lateAwakening", name: "延滞覚醒", icon: "延", text: "延滞中、利益+150%" },
+  { id: "pleasureAddiction", name: "快楽依存", icon: "快", text: "8チェイン以上で次ターン利益+50%" },
+  { id: "debtDodger", name: "踏み倒し", icon: "踏", text: "黒状態中、利息-50%" },
+  { id: "overInvest", name: "過剰投資", icon: "投", text: "借金3000以上で報酬4択" },
+  { id: "prepayRuin", name: "破滅の先払い", icon: "破", text: "即座に借金+1000 / 以後、利益+100%" },
+  { id: "desireRush", name: "欲望暴走", icon: "走", text: "10チェイン以上で追加ダメージ+300 / 借金+500" },
+  { id: "blackMarket", name: "黒市場", icon: "市", text: "赤状態以上で勝利するとレア契約率UP" },
   { id: "lifeCut", name: "命削り", icon: "命", text: "毎ターンHP-5 / 利益+50%" },
   { id: "interestRefund", name: "利息還元", icon: "還", text: "支払利息20%を利益変換" },
-  { id: "toxicAsset", name: "毒資産", icon: "毒", text: "毎ターン利益+20" },
-  { id: "greedDeal", name: "強欲契約", icon: "欲", text: "最終利益+30%" },
   { id: "lazyDeal", name: "怠惰契約", icon: "怠", text: "5チェイン以下で利益+50%" },
-  { id: "wrathDeal", name: "憤怒契約", icon: "怒", text: "黒状態でダメージ+100%" },
-  { id: "darkFinance", name: "闇金融", icon: "闇", text: "借金4000以上でダメージ+200%" },
+];
+
+const FINAL_CONTRACTS = [
+  { id: "soulCollateral", name: "魂担保", icon: "魂", text: "最終利益×2。ただし赤字なら破産演出強化。" },
+  { id: "defaultGamble", name: "踏み倒し賭博", icon: "賭", text: "50%で借金0。50%で借金2倍。" },
+  { id: "safeSettlement", name: "安全清算", icon: "安", text: "借金-30%。最終利益ボーナスなし。" },
 ];
 
 const getPiece = (id) => PIECES.find((piece) => piece.id === id);
@@ -76,9 +83,9 @@ const makeBoard = () => {
 
 const getDebtState = (debt) => {
   const ratio = Math.max(0, Math.min(1, debt / MAX_DEBT));
-  if (ratio > 0.8) return { id: "black", label: "黒", text: "利益+100% / 利息+50%", color: "#1A1A1A" };
-  if (ratio > 0.5) return { id: "red", label: "赤", text: "敵攻撃+20%", color: "#FF5C5C" };
-  if (ratio > 0.25) return { id: "yellow", label: "黄", text: "利息+10%", color: "#FFD24A" };
+  if (ratio > 0.8) return { id: "black", label: "黒", text: "利益+100% / ダメージ+100% / 利息+50%", color: "#1A1A1A" };
+  if (ratio > 0.5) return { id: "red", label: "赤", text: "利益+50% / 敵攻撃+20%", color: "#FF5C5C" };
+  if (ratio > 0.25) return { id: "yellow", label: "黄", text: "利益+20% / 利息+10%", color: "#FFD24A" };
   return { id: "blue", label: "青", text: "通常", color: "#4DA6FF" };
 };
 
@@ -90,16 +97,65 @@ const getThresholdBonus = (chain) => {
   return 1;
 };
 
-const nextThreshold = (chain) => [6, 8, 10, 12].find((value) => chain < value);
+const nextChainBonusThreshold = (chain) => [5, 8, 10, 12].find((value) => chain < value);
+
+const getChainFlatBonus = (chain) => {
+  if (chain >= 12) return { profit: 600, debt: 800, label: "欲望暴走" };
+  if (chain >= 10) return { profit: 300, debt: 300, label: "超ボーナス" };
+  if (chain >= 8) return { profit: 150, debt: 100, label: "上振れ" };
+  if (chain >= 5) return { profit: 50, debt: 0, label: "小ボーナス" };
+  return { profit: 0, debt: 0, label: "" };
+};
 
 const effectiveContracts = (game) => {
   if (game.characterId !== "envy" || game.contracts.length === 0) return game.contracts;
   return [...game.contracts, game.contracts[0]];
 };
 
+const hasContract = (contracts, id) => countContract(contracts, id) > 0;
+
+const getRewardCount = (game, defeatedDebtState = getDebtState(game.totalDebt)) => {
+  const contracts = effectiveContracts(game);
+  if (hasContract(contracts, "overInvest") && game.totalDebt >= 3000) return 4;
+  if (game.stageIndex === 4 && ["red", "black"].includes(defeatedDebtState.id)) return 4;
+  if (hasContract(contracts, "blackMarket") && ["red", "black"].includes(defeatedDebtState.id)) return 4;
+  return 3;
+};
+
+const createFinalSettlement = (game, draft, finalContract, gambleWin = false) => {
+  let totalDebt = draft.totalDebt;
+  let totalProfit = draft.totalProfit + game.finalProfitBonus;
+  let bankruptcyComic = game.bankruptcyComic;
+
+  if (finalContract?.id === "defaultGamble") {
+    totalDebt = gambleWin ? 0 : Math.min(MAX_DEBT * 2, totalDebt * 2);
+    bankruptcyComic = !gambleWin;
+  }
+  if (finalContract?.id === "safeSettlement") {
+    totalDebt = Math.round(totalDebt * 0.7);
+  }
+
+  let finalProfit = Math.round(totalProfit - totalDebt - draft.totalInterest);
+
+  if (finalContract?.id === "soulCollateral") {
+    finalProfit *= 2;
+    if (finalProfit <= 0) bankruptcyComic = true;
+  }
+
+  return {
+    totalProfit,
+    totalDebt,
+    totalInterest: draft.totalInterest,
+    finalProfit,
+    finalContract,
+    gambleWin,
+    bankruptcyComic,
+  };
+};
+
 const calculateTurn = (game, chain) => {
   if (chain < 3) {
-    return { profit: 0, debtGain: 0, damage: 0, heal: 0, lifeCost: 0, bonus: 1 };
+    return { profit: 0, debtGain: 0, damage: 0, heal: 0, lifeCost: 0, bonus: 1, chainBonus: getChainFlatBonus(chain), fever: false };
   }
 
   const debtState = getDebtState(game.totalDebt);
@@ -107,9 +163,22 @@ const calculateTurn = (game, chain) => {
   let profitMultiplier = getThresholdBonus(chain);
   let debtMultiplier = BALANCE.riskMultiplier;
   let damageMultiplier = BALANCE.attackMultiplier;
+  let flatProfit = 0;
+  let flatDebt = 0;
+  let flatDamage = 0;
 
-  if (debtState.id === "black") profitMultiplier *= 2;
+  if (debtState.id === "yellow") profitMultiplier *= 1.2;
+  if (debtState.id === "red") {
+    profitMultiplier *= 1.5;
+    if (chain >= 8) flatProfit += 100;
+  }
+  if (debtState.id === "black") {
+    profitMultiplier *= 2;
+    damageMultiplier *= 2;
+    if (chain >= 10) flatProfit += 300;
+  }
   if (game.nextProfitBoost) profitMultiplier *= 2;
+  if (game.pleasureBoost) profitMultiplier *= 1.5;
   if (game.characterId === "greed") {
     profitMultiplier *= 1.3;
     debtMultiplier *= 1.2;
@@ -124,28 +193,35 @@ const calculateTurn = (game, chain) => {
       debtMultiplier *= 1.3;
     }
     if (contract.id === "runawayMana" && game.totalDebt >= MAX_DEBT * 0.8) profitMultiplier *= 2;
-    if (contract.id === "lateAwakening" && game.overdue) profitMultiplier *= 2.5;
     if (contract.id === "lifeCut") profitMultiplier *= 1.5;
     if (contract.id === "lazyDeal" && chain <= 5) profitMultiplier *= 1.5;
+    if (contract.id === "prepayRuin") profitMultiplier *= 2;
+    if (contract.id === "desireRush" && chain >= 10) {
+      flatDamage += 300;
+      flatDebt += 500;
+    }
   });
 
+  const chainBonus = getChainFlatBonus(chain);
+  flatProfit += chainBonus.profit;
+  flatDebt += chainBonus.debt;
+
+  if (game.stageIndex === 1 && chain >= 5) flatProfit += 100;
+  if (game.stageIndex === 3 && chain >= 8) flatProfit += 200;
+  if (game.stageIndex === 6 && chain >= 10) {
+    flatDamage += 500;
+    flatDebt += 500;
+  }
+
   const baseProfit = chain ** 2 * BALANCE.enemyMultiplier;
-  const passiveProfit = countContract(contracts, "toxicAsset") * 20;
-  const profit = Math.round(baseProfit * profitMultiplier + passiveProfit);
-  const debtGain = Math.round(chain ** 3 * debtMultiplier);
+  const profit = Math.round(baseProfit * profitMultiplier + flatProfit);
+  const debtGain = Math.round(chain ** 3 * debtMultiplier + flatDebt);
 
-  if (game.totalDebt >= 4000) {
-    damageMultiplier *= 1 + countContract(contracts, "darkFinance") * 2;
-  }
-  if (debtState.id === "black") {
-    damageMultiplier *= 1 + countContract(contracts, "wrathDeal");
-  }
-
-  const damage = Math.round(profit * damageMultiplier);
+  const damage = Math.round(profit * damageMultiplier + flatDamage);
   const heal = game.characterId === "gluttony" ? Math.round(debtGain * 0.1) : 0;
   const lifeCost = countContract(contracts, "lifeCut") * 5;
 
-  return { profit, debtGain, damage, heal, lifeCost, bonus: getThresholdBonus(chain) };
+  return { profit, debtGain, damage, heal, lifeCost, bonus: getThresholdBonus(chain), chainBonus, fever: debtState.id === "black" || chain >= 10 };
 };
 
 const applyGravity = (board, path) => {
@@ -177,7 +253,13 @@ const addCursePieces = (board, count) => {
   return next;
 };
 
-const randomRewards = () => [...CONTRACTS].sort(() => Math.random() - 0.5).slice(0, 3);
+const randomRewards = (count = 3, preferRare = false) => {
+  const rareIds = ["prepayRuin", "desireRush", "blackMarket", "overInvest"];
+  const pool = preferRare
+    ? [...CONTRACTS].sort((a, b) => (rareIds.includes(b.id) ? 1 : 0) - (rareIds.includes(a.id) ? 1 : 0) || Math.random() - 0.5)
+    : [...CONTRACTS].sort(() => Math.random() - 0.5);
+  return pool.slice(0, count);
+};
 
 const initialGame = () => ({
   screen: "home",
@@ -201,6 +283,11 @@ const initialGame = () => ({
   curseCount: 0,
   nextProfitBoost: false,
   noDamageTurns: 0,
+  pleasureBoost: false,
+  finalProfitBonus: 0,
+  finalContract: null,
+  finalDraft: null,
+  bankruptcyComic: false,
   message: "欲張るほど気持ちいい。どこで指を離す？",
   lastTurn: null,
   settlement: null,
@@ -479,7 +566,7 @@ function RewardScreen({ game, onChoose }) {
         <p>この選択が、君の未来を決める。</p>
       </section>
 
-      <section className="rewardCards">
+      <section className={`rewardCards rewardCount${game.rewards.length}`}>
         {game.rewards.map((contract, index) => {
           const style = rewardStyles[index] || rewardStyles[2];
           const parts = contract.text.split(" / ");
@@ -596,8 +683,43 @@ function InterimReportScreen({ game, onNext }) {
       </section>
 
       <footer className="interimActions">
-        <button type="button" onClick={onNext}>契約を選ぶ <span>報酬3択へ進む</span></button>
+        <button type="button" onClick={onNext}>契約を選ぶ <span>報酬{game.rewards.length}択へ進む</span></button>
       </footer>
+    </section>
+  );
+}
+
+function FinalContractScreen({ game, onChoose }) {
+  const draft = game.finalDraft || { totalProfit: game.totalProfit, totalDebt: game.totalDebt, totalInterest: game.totalInterest };
+  const predicted = draft.totalProfit + game.finalProfitBonus - draft.totalDebt - draft.totalInterest;
+
+  return (
+    <section className="finalContractScreen">
+      <header className="interimHero">
+        <span>FINAL CONTRACT</span>
+        <h2>最後の悪あがき</h2>
+        <p>ラスボスは倒した。だが、まだ精算は終わっていない。もう一回だけ欲張る？</p>
+      </header>
+
+      <section className="interimLedger">
+        <h3>精算直前</h3>
+        <div><span>総利益</span><strong className="profitText">¥ {formatMoney(draft.totalProfit + game.finalProfitBonus)}</strong></div>
+        <div><span>総借金</span><strong className="debtText">¥ {formatMoney(draft.totalDebt)}</strong></div>
+        <div><span>累積利息</span><strong className="debtText">¥ {formatMoney(draft.totalInterest)}</strong></div>
+        <div><span>このまま精算</span><strong className={predicted > 0 ? "profitText" : "debtText"}>{predicted < 0 ? "- " : ""}¥ {formatMoney(Math.abs(predicted))}</strong></div>
+      </section>
+
+      <section className="finalContractGrid">
+        {FINAL_CONTRACTS.map((contract) => (
+          <button key={contract.id} type="button" onClick={() => onChoose(contract)}>
+            <i>{contract.icon}</i>
+            <strong>{contract.name}</strong>
+            <span>{contract.text}</span>
+          </button>
+        ))}
+      </section>
+
+      <p className="settlementTagline">勝ったあとにも欲望は来る。<b>最後まで判断しよう。</b></p>
     </section>
   );
 }
@@ -620,8 +742,8 @@ function SettlementScreen({ settlement, onResult }) {
 
       <header className="settlementHero">
         <div className="settlementRing" />
-        <h2>最終精算</h2>
-        <p>さあ、魔力の借金を清算しよう。</p>
+        <h2>{isClear ? "最終精算" : "破産！"}</h2>
+        <p>{isClear ? "さあ、魔力の借金を清算しよう。" : "欲張りすぎました。回収完了、次は返せるはず。"}</p>
       </header>
 
       <section className="settlementLedger">
@@ -641,7 +763,7 @@ function SettlementScreen({ settlement, onResult }) {
             <span>すべてを精算した君の手元に残る金額</span>
           </div>
           <b>{settlement.finalProfit < 0 ? "- " : ""}¥ {formatMoney(Math.abs(settlement.finalProfit))}</b>
-          <em>{isClear ? "生き残れた…！" : "返済不能…"}</em>
+          <em>{isClear ? "生き残れた…！" : settlement.bankruptcyComic ? "やらかした！" : "返済不能…"}</em>
         </div>
       </section>
 
@@ -653,14 +775,14 @@ function SettlementScreen({ settlement, onResult }) {
         </div>
         <div className={`judgementCard bankruptCard ${!isClear ? "active" : ""}`}>
           <strong>BANKRUPT</strong>
-          <span>完全破産…</span>
+          <span>{settlement.bankruptcyComic ? "欲張りすぎました" : "完全破産…"}</span>
           <i>✕</i>
         </div>
       </section>
 
       <p className="settlementTagline">
         魔力は貸すもの、返すのは未来のあなた。<br />
-        <b>次は、もっと欲張ってみる？</b>
+        <b>{isClear ? "次は、もっと欲張ってみる？" : "次は返せるはず…もう1回！"}</b>
       </p>
 
       <footer className="settlementActions singleAction">
@@ -819,9 +941,11 @@ export default function App() {
 
   const processInterest = (current, board, profit, debt, rate) => {
     const debtState = getDebtState(debt);
-    const stateMultiplier = debtState.id === "black" ? 1.5 : debtState.id === "yellow" ? 1.1 : 1;
+    const contracts = effectiveContracts(current);
+    let stateMultiplier = debtState.id === "black" ? 1.5 : debtState.id === "yellow" ? 1.1 : 1;
+    if (debtState.id === "black" && hasContract(contracts, "debtDodger")) stateMultiplier *= 0.5;
     const interest = Math.round(debt * (rate + current.interestPenalty) * stateMultiplier);
-    const refund = Math.round(interest * 0.2 * countContract(effectiveContracts(current), "interestRefund"));
+    const refund = Math.round(interest * 0.2 * countContract(contracts, "interestRefund"));
     let nextProfit = profit - interest + refund;
     let nextDebt = debt;
     let overdue = current.overdue;
@@ -867,8 +991,7 @@ export default function App() {
 
       if (enemyHp <= 0) {
         if (stage.final) {
-          const finalMultiplier = 1 + countContract(effectiveContracts(current), "greedDeal") * 0.3;
-          const finalProfit = Math.round((totalProfit - totalDebt - current.totalInterest) * finalMultiplier);
+          const finalDraft = { totalProfit, totalDebt, totalInterest: current.totalInterest };
           return {
             ...current,
             board: clearedBoard,
@@ -881,11 +1004,13 @@ export default function App() {
             maxDebt: Math.max(current.maxDebt, totalDebt),
             maxChain,
             nextProfitBoost: false,
-            screen: "settlement",
-            settlement: { totalProfit, totalDebt, totalInterest: current.totalInterest, finalProfit },
-            result: finalProfit > 0 ? "clear" : "bankrupt",
+            pleasureBoost: false,
+            screen: "finalContract",
+            finalDraft,
+            settlement: null,
+            result: null,
             lastTurn: result,
-            message: "徴収王撃破。未来に押し付けた欲望の答え合わせ。",
+            message: "徴収王撃破。最後の悪あがきを選べ。",
           };
         }
 
@@ -908,6 +1033,11 @@ export default function App() {
           message = interestResult.note;
         }
 
+        const defeatedDebtState = getDebtState(totalDebt);
+        const rewardCount = getRewardCount({ ...current, totalDebt }, defeatedDebtState);
+        const preferRare = hasContract(effectiveContracts(current), "blackMarket") && ["red", "black"].includes(defeatedDebtState.id);
+        const finalProfitBonus = current.finalProfitBonus + (current.stageIndex === 7 && defeatedDebtState.id === "black" ? 500 : 0);
+
         return {
           ...current,
           board: nextBoard,
@@ -924,15 +1054,18 @@ export default function App() {
           interestPenalty,
           curseCount,
           nextProfitBoost,
+          pleasureBoost: hasContract(effectiveContracts(current), "pleasureAddiction") && current.path.length >= 8,
+          finalProfitBonus,
           screen: "interim",
-          rewards: randomRewards(),
+          rewards: randomRewards(rewardCount, preferRare),
           lastTurn: result,
           message: `${stage.name}を撃破。${message}`,
         };
       }
 
       const debtState = getDebtState(totalDebt);
-      const enemyAttack = Math.round(stage.attack * (debtState.id === "red" ? 1.2 : 1));
+      const stageAttackBonus = current.stageIndex === 3 && current.path.length >= 8 ? 10 : 0;
+      const enemyAttack = Math.round((stage.attack + stageAttackBonus) * (debtState.id === "red" ? 1.2 : 1));
       hp = Math.max(0, hp - enemyAttack);
       const noDamageTurns = enemyAttack > 0 ? 0 : current.noDamageTurns + 1;
 
@@ -968,6 +1101,7 @@ export default function App() {
         maxChain,
         turn: current.turn + 1,
         nextProfitBoost,
+        pleasureBoost: false,
         noDamageTurns,
         lastTurn: { ...result, enemyAttack },
         message: `${message} 敵攻撃 ${enemyAttack}。まだ助かる。`,
@@ -978,32 +1112,55 @@ export default function App() {
   const chooseReward = (contract) => {
     setGame((current) => {
       const nextStageIndex = current.stageIndex + 1;
+      const addedDebt = contract?.id === "prepayRuin" ? 1000 : 0;
+      const totalDebt = Math.min(MAX_DEBT, current.totalDebt + addedDebt);
       return {
         ...current,
         contracts: contract ? [...current.contracts, contract] : current.contracts,
+        totalDebt,
+        maxDebt: Math.max(current.maxDebt, totalDebt),
         stageIndex: nextStageIndex,
         enemyHp: STAGES[nextStageIndex].hp,
         rewards: [],
         screen: "map",
-        message: contract ? `${contract.name}を契約。今回だけは行ける。` : "契約を見送った。身軽だが、上振れも逃した。",
+        message: contract ? `${contract.name}を契約。${addedDebt ? "借金を前借りした。以後、利益2倍。" : "今回だけは行ける。"}` : "契約を見送った。身軽だが、上振れも逃した。",
+      };
+    });
+  };
+
+  const chooseFinalContract = (contract) => {
+    setGame((current) => {
+      const gambleWin = contract.id === "defaultGamble" ? Math.random() < 0.5 : false;
+      const settlement = createFinalSettlement(current, current.finalDraft, contract, gambleWin);
+      return {
+        ...current,
+        totalProfit: settlement.totalProfit,
+        totalDebt: settlement.totalDebt,
+        maxDebt: Math.max(current.maxDebt, settlement.totalDebt),
+        finalContract: contract,
+        bankruptcyComic: settlement.bankruptcyComic,
+        settlement,
+        result: settlement.finalProfit > 0 ? "clear" : "bankrupt",
+        screen: "settlement",
+        message: `${contract.name}を選択。${settlement.finalProfit > 0 ? "まだ助かった。" : "欲張りすぎました。"}`,
       };
     });
   };
 
   const debtState = getDebtState(game.totalDebt);
   const chainPiece = game.path[0] ? getPiece(game.board[game.path[0].row][game.path[0].col]) : null;
-  const threshold = nextThreshold(game.path.length);
+  const threshold = nextChainBonusThreshold(game.path.length);
+  const chainBonus = getChainFlatBonus(game.path.length);
   const enemyHpPercent = Math.max(0, (game.enemyHp / stage.hp) * 100);
   const hpPercent = Math.max(0, (game.hp / PLAYER_MAX_HP) * 100);
   const debtPercent = Math.min(100, (game.totalDebt / MAX_DEBT) * 100);
   const dangerLabel = debtState.id === "blue" ? "安全" : debtState.id === "yellow" ? "警戒" : debtState.id === "red" ? "危険域" : "限界";
-  const nextThresholdLabel = threshold ? `${threshold}チェイン` : "上限到達";
+  const nextThresholdLabel = threshold ? `${threshold}チェイン` : "欲望暴走中";
   const bonusRows = [
-    { label: "3〜5", multiplier: "× 1.0", active: game.path.length >= 3 && game.path.length <= 5 },
-    { label: "6〜7", multiplier: "× 1.3", active: game.path.length >= 6 && game.path.length <= 7 },
-    { label: "8〜9", multiplier: "× 1.6", active: game.path.length >= 8 && game.path.length <= 9 },
-    { label: "10〜11", multiplier: "× 2.0", active: game.path.length >= 10 && game.path.length <= 11 },
-    { label: "12〜", multiplier: "× 2.8", active: game.path.length >= 12 },
+    { label: "5+", multiplier: "利益+50", active: game.path.length >= 5 && game.path.length < 8 },
+    { label: "8+", multiplier: "利益+150 借金+100", active: game.path.length >= 8 && game.path.length < 10 },
+    { label: "10+", multiplier: "利益+300 借金+300", active: game.path.length >= 10 && game.path.length < 12 },
+    { label: "12+", multiplier: "欲望暴走", active: game.path.length >= 12 },
   ];
 
   return (
@@ -1049,7 +1206,7 @@ export default function App() {
               <div className="temptationCard">
                 <small>{threshold ? `あと ${threshold - game.path.length} 個で` : "快楽上限"}</small>
                 <strong>{threshold ? `${threshold}チェイン` : "12チェイン超え"}</strong>
-                <span>{threshold ? "ボーナス！" : "未来が燃える。"}</span>
+                <span>{threshold ? "固定ボーナス！" : "欲望暴走"}</span>
               </div>
               <div className="previewCard">
                 <span>予測チェイン</span>
@@ -1061,6 +1218,9 @@ export default function App() {
                 </dl>
               </div>
             </section>
+
+            {debtState.id === "black" && <div className="feverBanner">欲望暴走</div>}
+            {chainBonus.label && game.path.length >= 5 && <div className="feverBanner chainBonusBanner">{chainBonus.label} 利益+{chainBonus.profit} 借金+{chainBonus.debt}</div>}
 
             <section className="puzzleZone">
               <aside className="bonusLadder">
@@ -1141,6 +1301,7 @@ export default function App() {
 
         {game.screen === "interim" && <InterimReportScreen game={game} onNext={() => setGame((current) => ({ ...current, screen: "reward" }))} />}
         {game.screen === "reward" && <RewardScreen game={game} onChoose={chooseReward} />}
+        {game.screen === "finalContract" && <FinalContractScreen game={game} onChoose={chooseFinalContract} />}
         {game.screen === "settlement" && <SettlementScreen settlement={game.settlement} onResult={() => setGame((current) => ({ ...current, screen: "result" }))} />}
         {game.screen === "result" && <ResultScreen game={game} onRetry={retry} onTitle={reset} />}
       </section>
