@@ -19,9 +19,10 @@ html,
 body,
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--bg-navy);
 }
 
@@ -31,14 +32,15 @@ button {
 
 .app {
   width: 100vw;
-  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 10px 10px max(10px, env(safe-area-inset-bottom));
   color: var(--white);
   user-select: none;
-  touch-action: none;
+  touch-action: manipulation;
   background:
     radial-gradient(circle at 48% 0%, rgba(126, 230, 255, 0.22), transparent 28%),
     linear-gradient(180deg, #081127, var(--bg-navy));
@@ -46,6 +48,7 @@ button {
 
 .phone {
   position: relative;
+  flex-shrink: 0;
   width: min(100%, calc(100dvh * 9 / 16));
   max-width: 520px;
   aspect-ratio: 9 / 16;
@@ -926,13 +929,14 @@ button {
   position: relative;
   height: 100%;
   display: grid;
-  grid-template-columns: 0.58fr 1fr 0.34fr;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-rows: 104px minmax(0, 1fr) auto;
+  gap: 10px;
   overflow: hidden;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   background:
-    radial-gradient(circle at 52% 42%, rgba(77, 166, 255, 0.18), transparent 32%),
-    radial-gradient(circle at 12% 72%, rgba(126, 230, 255, 0.12), transparent 24%);
+    radial-gradient(circle at 50% 42%, rgba(77, 166, 255, 0.2), transparent 34%),
+    radial-gradient(circle at 50% 95%, rgba(155, 107, 255, 0.2), transparent 28%),
+    linear-gradient(180deg, rgba(3, 10, 24, 0.25), rgba(2, 8, 20, 0.44));
 }
 
 .mapScreen::before {
@@ -944,319 +948,175 @@ button {
     radial-gradient(circle at 8% 10%, rgba(244, 248, 255, 0.8) 0 2px, transparent 3px),
     radial-gradient(circle at 86% 20%, rgba(126, 230, 255, 0.7) 0 2px, transparent 3px),
     radial-gradient(circle at 12% 55%, rgba(77, 166, 255, 0.65) 0 2px, transparent 3px),
+    radial-gradient(circle at 90% 75%, rgba(255, 92, 92, 0.5) 0 2px, transparent 3px),
     linear-gradient(125deg, transparent 0 56%, rgba(126, 230, 255, 0.1) 57% 58%, transparent 59%);
 }
 
 .mapHeader,
-.mapPlayerPanel,
-.mapSideMenu,
 .mapRail,
-.mapFooter,
-.mapDecor {
+.mapNodeSheet,
+.mapTemptation {
   position: relative;
   z-index: 1;
 }
 
 .mapHeader {
-  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1.12fr;
-  gap: 10px;
-  min-height: 96px;
+  grid-template-columns: 0.82fr 1.16fr 0.82fr;
+  gap: 7px;
+  min-height: 0;
 }
 
-.mapLogo {
+.mapStateCard {
+  min-width: 0;
   display: grid;
   align-content: center;
-  gap: 2px;
+  gap: 3px;
+  border: 1px solid rgba(126, 230, 255, 0.3);
+  border-radius: 10px;
+  padding: 9px;
+  background: rgba(3, 16, 40, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.06), 0 0 18px rgba(77, 166, 255, 0.14);
 }
 
-.mapLogo span {
-  color: var(--white);
-  font-size: 17px;
-  font-weight: 1000;
-  text-shadow: 0 0 12px rgba(126, 230, 255, 0.7);
-}
-
-.mapLogo strong {
-  color: var(--white);
-  font-size: 25px;
-  line-height: 0.95;
-  text-shadow: 0 0 18px rgba(77, 166, 255, 0.85);
-}
-
-.mapLogo em {
-  justify-self: start;
-  padding: 3px 10px;
-  color: var(--white);
+.mapStateCard span,
+.mapStateCard small,
+.mapStateCard em {
+  color: rgba(244, 248, 255, 0.76);
   font-size: 10px;
   font-style: normal;
-  font-weight: 1000;
-  background: rgba(3, 20, 48, 0.78);
-  box-shadow: 0 0 12px rgba(77, 166, 255, 0.28);
-}
-
-.mapStats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.mapStats > div {
-  min-width: 0;
-  border-radius: 8px;
-  padding: 7px;
-  background: rgba(3, 20, 48, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(126, 230, 255, 0.2);
-}
-
-.mapStats span,
-.mapInfoCard small,
-.mapContracts small {
-  color: rgba(244, 248, 255, 0.68);
-  font-size: 10px;
   font-weight: 900;
 }
 
-.mapStats strong {
-  display: block;
-  margin-top: 3px;
+.mapStateCard strong {
+  color: var(--white);
   overflow: hidden;
-  font-size: 17px;
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.mapDebtMeter {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 5px;
-}
-
-.mapDebtMeter .segmentedGauge {
-  height: 12px;
-}
-
-.mapDebtMeter .segmentedGauge em {
-  width: 14px;
-  height: 22px;
-}
-
-.mapDebtMeter strong {
-  margin: 0;
-  color: var(--profit-gold);
-  font-size: 11px;
-  text-align: right;
-}
-
-.mapPlayerPanel {
-  grid-column: 1;
-  grid-row: 2;
-  display: grid;
-  grid-template-rows: 1fr auto auto auto;
-  gap: 8px;
-  min-width: 0;
-}
-
-.mapPortrait {
-  position: relative;
-  min-height: 0;
-  border: 1px solid rgba(126, 230, 255, 0.34);
-  border-radius: 10px;
-  overflow: hidden;
+.mapStateCard.final {
+  text-align: center;
   background:
-    radial-gradient(circle at 50% 35%, rgba(126, 230, 255, 0.35), transparent 34%),
-    linear-gradient(180deg, rgba(77, 166, 255, 0.16), rgba(3, 20, 48, 0.84));
-  box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.08), 0 0 18px rgba(77, 166, 255, 0.2);
+    radial-gradient(circle at 50% 25%, rgba(126, 230, 255, 0.16), transparent 62%),
+    rgba(3, 16, 40, 0.78);
 }
 
-.mapPortrait::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -10px;
-  width: 86px;
-  height: 128px;
-  border-radius: 52px 52px 12px 12px;
-  background: linear-gradient(180deg, rgba(126, 230, 255, 0.2), rgba(0, 0, 0, 0.78));
-  transform: translateX(-50%);
-}
-
-.mapPortrait::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 22%;
-  width: 54px;
-  height: 58px;
-  border-radius: 50%;
-  background: #071326;
-  box-shadow: 0 0 22px rgba(126, 230, 255, 0.38);
-  transform: translateX(-50%);
-}
-
-.mapPortrait span {
-  position: absolute;
-  left: 10px;
-  bottom: 8px;
+.mapStateCard.final strong {
   color: var(--cyan);
-  font-size: 12px;
-  font-weight: 1000;
+  font-size: 34px;
+  text-shadow: 0 0 18px rgba(126, 230, 255, 0.85);
 }
 
-.mapInfoCard,
-.mapContracts {
-  display: grid;
-  gap: 5px;
-  border-radius: 8px;
-  padding: 8px;
-  background: rgba(3, 20, 48, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(126, 230, 255, 0.18);
+.mapStateCard.overdrive {
+  overflow: hidden;
 }
 
-.mapInfoCard strong {
-  color: var(--white);
-  font-size: 22px;
+.mapStateCard.overdrive strong {
+  color: #ff4d91;
+  font-size: 30px;
+  text-shadow: 0 0 16px rgba(255, 77, 145, 0.72);
 }
 
-.mapInfoCard em {
-  color: rgba(244, 248, 255, 0.68);
-  font-size: 13px;
-  font-style: normal;
+.mapStateCard.overdrive.black strong {
+  color: var(--profit-gold);
+  text-shadow: 0 0 20px rgba(255, 210, 74, 0.8), 0 0 30px rgba(155, 107, 255, 0.5);
 }
 
-.mapContracts div {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+.mapOverdriveGauge {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(244, 248, 255, 0.12);
 }
 
-.mapContracts span {
-  width: 25px;
-  height: 25px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(126, 230, 255, 0.3);
-  border-radius: 50%;
-  color: var(--white);
-  font-size: 11px;
-  font-weight: 1000;
-  background: rgba(155, 107, 255, 0.28);
-}
-
-.mapSideMenu {
-  grid-column: 3;
-  grid-row: 2;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.mapSideMenu button {
-  position: relative;
-  min-height: 58px;
-  display: grid;
-  place-items: center;
-  gap: 3px;
-  border: 1px solid rgba(126, 230, 255, 0.24);
-  border-radius: 8px;
-  color: var(--white);
-  font-size: 11px;
-  font-weight: 1000;
-  background: rgba(3, 20, 48, 0.78);
-  box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.06);
-}
-
-.mapSideMenu span {
-  color: var(--cyan);
-  font-size: 19px;
-  line-height: 1;
-}
-
-.mapSideMenu em {
-  position: absolute;
-  right: -3px;
-  top: -4px;
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--white);
-  background: var(--debt-red);
-  font-size: 12px;
-  font-style: normal;
+.mapOverdriveGauge i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--main-blue), var(--profit-gold), var(--debt-red), #111);
+  box-shadow: 0 0 16px rgba(126, 230, 255, 0.6);
 }
 
 .mapRail {
-  grid-column: 2;
-  grid-row: 2;
   position: relative;
   min-height: 0;
-  display: grid;
-  grid-template-rows: repeat(9, 1fr);
-  gap: 6px;
+  margin: 4px 34px 0;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  padding: 12px 0 18px;
 }
 
 .mapRail::before {
   content: "";
   position: absolute;
-  left: 25px;
-  top: 24px;
-  bottom: 24px;
-  width: 4px;
+  left: 50%;
+  top: 40px;
+  bottom: 46px;
+  width: 5px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--profit-gold), var(--cyan), var(--contract-purple), var(--danger-orange), var(--cyan), var(--debt-red));
+  background: linear-gradient(0deg, var(--main-blue), var(--cyan), var(--contract-purple), var(--profit-gold), var(--debt-red));
   box-shadow: 0 0 16px rgba(126, 230, 255, 0.72);
+  transform: translateX(-50%);
 }
 
 .mapNode {
   position: relative;
+  z-index: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: 34px 54px 1fr;
+  grid-template-columns: 1fr 70px 1fr;
   align-items: center;
-  gap: 7px;
-  min-height: 0;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  color: var(--white);
+  text-align: left;
+  background: transparent;
+  opacity: 0.42;
+  transform: scale(0.9);
+  transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
 }
 
-.mapNode i {
-  z-index: 1;
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--cyan);
-  border-radius: 50%;
-  color: var(--white);
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 1000;
-  background: rgba(4, 32, 74, 0.92);
-  box-shadow: 0 0 14px rgba(126, 230, 255, 0.62);
+.mapNode:nth-child(even) {
+  grid-template-columns: 1fr 70px 1fr;
+}
+
+.mapNode:nth-child(even) div {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  text-align: right;
+}
+
+.mapNode:nth-child(even) .nodeSigil {
+  grid-column: 2;
 }
 
 .nodeSigil {
-  z-index: 1;
-  width: 50px;
-  height: 50px;
+  grid-column: 2;
+  width: 64px;
+  height: 64px;
   display: grid;
   place-items: center;
   border: 2px solid var(--cyan);
   border-radius: 50%;
   color: var(--white);
-  font-size: 25px;
+  font-size: 28px;
   background:
     radial-gradient(circle, rgba(126, 230, 255, 0.18), rgba(3, 20, 48, 0.92));
-  box-shadow: 0 0 20px rgba(126, 230, 255, 0.72);
+  box-shadow: 0 0 16px rgba(126, 230, 255, 0.46);
 }
 
 .mapNode div {
   min-width: 0;
-  padding: 8px 10px;
-  clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%, 8px 50%);
-  background: rgba(3, 20, 48, 0.76);
-  box-shadow: inset 0 0 0 1px rgba(126, 230, 255, 0.24);
+  padding: 5px 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .mapNode strong,
@@ -1269,93 +1129,198 @@ button {
 
 .mapNode strong {
   color: var(--white);
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.1;
 }
 
 .mapNode small {
   margin-top: 3px;
   color: rgba(244, 248, 255, 0.72);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 900;
 }
 
-.mapNode.current i,
 .mapNode.current .nodeSigil {
   border-color: var(--profit-gold);
-  box-shadow: 0 0 22px rgba(255, 210, 74, 0.82);
+  box-shadow: 0 0 24px rgba(255, 210, 74, 0.86), 0 0 34px rgba(126, 230, 255, 0.35);
+  animation: mapNodePulse 1.5s ease-in-out infinite;
+}
+
+.mapNode.current {
+  cursor: pointer;
+  opacity: 1;
+  filter: brightness(1.12);
+  transform: scale(1.08);
 }
 
 .mapNode.current div {
-  box-shadow: inset 0 0 0 1px rgba(255, 210, 74, 0.5), 0 0 14px rgba(255, 210, 74, 0.22);
+  text-shadow: 0 0 12px rgba(255, 210, 74, 0.5);
 }
 
 .mapNode.boss .nodeSigil,
-.mapNode.boss i {
+.mapNode.boss.current .nodeSigil {
   border-color: var(--contract-purple);
-  box-shadow: 0 0 18px rgba(155, 107, 255, 0.65);
+  box-shadow: 0 0 24px rgba(155, 107, 255, 0.76), 0 0 34px rgba(126, 230, 255, 0.26);
 }
 
-.mapNode.boss div {
-  box-shadow: inset 0 0 0 1px rgba(155, 107, 255, 0.45);
+.mapNode.boss .nodeSigil {
+  width: 74px;
+  height: 74px;
+  color: #efe6ff;
 }
 
 .mapNode.final .nodeSigil,
-.mapNode.final i {
+.mapNode.final.current .nodeSigil {
   border-color: var(--debt-red);
   color: #ffd7d7;
-  box-shadow: 0 0 22px rgba(255, 92, 92, 0.78);
+  box-shadow: 0 0 28px rgba(255, 92, 92, 0.78), 0 0 42px rgba(255, 210, 74, 0.24);
 }
 
 .mapNode.done {
-  opacity: 0.62;
+  opacity: 0.3;
 }
 
-.mapDecor {
+.mapNode.locked {
+  pointer-events: none;
+}
+
+.mapNode.selected .nodeSigil {
+  outline: 2px solid rgba(244, 248, 255, 0.75);
+  outline-offset: 4px;
+}
+
+.mapTemptation {
   position: absolute;
-  z-index: 0;
-  width: 120px;
-  min-height: 80px;
-  border: 1px solid rgba(126, 230, 255, 0.18);
-  border-radius: 8px;
-  padding: 10px;
-  color: rgba(244, 248, 255, 0.38);
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.45;
-  background: rgba(244, 248, 255, 0.06);
-}
-
-.decorContract {
-  left: -16px;
-  bottom: 126px;
-  transform: rotate(-13deg);
-}
-
-.decorInvoice {
-  right: -18px;
-  bottom: 108px;
-  transform: rotate(13deg);
-}
-
-.mapFooter {
-  grid-column: 1 / -1;
-  grid-row: 3;
+  left: 18px;
+  right: 18px;
+  bottom: calc(92px + env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: 58px 1fr;
-  gap: 10px;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  border: 1px solid rgba(126, 230, 255, 0.22);
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: rgba(3, 16, 40, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.06), 0 0 20px rgba(77, 166, 255, 0.12);
+  pointer-events: none;
+}
+
+.mapTemptation span,
+.mapTemptation small {
+  color: rgba(244, 248, 255, 0.7);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.mapTemptation strong {
+  color: var(--white);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.mapTemptation em {
+  grid-column: 2;
+  color: var(--profit-gold);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 1000;
+}
+
+.mapTemptation small {
+  grid-column: 2;
+}
+
+.mapNodeSheet {
+  flex-shrink: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 62px 1fr 124px;
+  gap: 9px;
   align-items: center;
+  border: 1px solid rgba(126, 230, 255, 0.36);
+  border-radius: 14px;
+  padding: 10px 10px max(10px, env(safe-area-inset-bottom));
+  background: rgba(3, 16, 40, 0.9);
+  box-shadow: 0 -10px 30px rgba(2, 8, 20, 0.36), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+  transform: translateY(0);
+}
+
+.sheetIcon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--contract-purple);
+  border-radius: 50%;
+  color: var(--cyan);
+  font-size: 26px;
+  box-shadow: 0 0 18px rgba(126, 230, 255, 0.36);
+}
+
+.sheetMain {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.sheetMain span,
+.sheetMain p,
+.sheetTags b {
+  color: rgba(244, 248, 255, 0.76);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.sheetMain strong {
+  color: var(--white);
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheetMain p {
+  margin: 0;
+  color: rgba(244, 248, 255, 0.82);
+}
+
+.sheetTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sheetTags b {
+  border: 1px solid rgba(126, 230, 255, 0.2);
+  border-radius: 999px;
+  padding: 3px 6px;
+  color: var(--cyan);
+  background: rgba(126, 230, 255, 0.08);
+}
+
+.mapHintButton {
+  grid-column: 1 / -1;
+  min-height: 48px;
+  border: 1px solid rgba(126, 230, 255, 0.3);
+  border-radius: 10px;
+  color: var(--cyan);
+  font-weight: 1000;
+  background: rgba(126, 230, 255, 0.08);
 }
 
 .prepareButton {
-  min-height: 48px;
+  min-height: 58px;
   border: 1px solid rgba(126, 230, 255, 0.38);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--white);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 1000;
   background: linear-gradient(180deg, rgba(126, 230, 255, 0.35), rgba(23, 107, 212, 0.9));
   box-shadow: 0 0 22px rgba(77, 166, 255, 0.46), inset 0 0 0 1px rgba(244, 248, 255, 0.24);
+}
+
+.prepareButton:disabled {
+  opacity: 0.46;
 }
 
 .prepareButton span {
@@ -1363,6 +1328,11 @@ button {
   margin-top: 2px;
   color: rgba(244, 248, 255, 0.72);
   font-size: 10px;
+}
+
+@keyframes mapNodePulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.25); }
 }
 
 .battleScreen {

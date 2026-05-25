@@ -423,87 +423,101 @@ function CharacterSelect({ selectedId, onSelect, onNext }) {
 }
 
 function MapScreen({ game, onNext }) {
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const debtState = getDebtState(game.totalDebt);
   const debtPercent = Math.round(Math.min(100, (game.totalDebt / MAX_DEBT) * 100));
-  const cash = game.totalProfit - game.totalDebt - game.totalInterest;
-  const character = CHARACTERS.find((item) => item.id === game.characterId) || CHARACTERS[0];
-  const mapMenus = ["契約一覧", "ミッション", "ショップ", "図鑑", "設定"];
+  const predictedFinal = game.totalProfit + game.finalProfitBonus - game.totalDebt - game.totalInterest;
+  const currentStage = STAGES[game.stageIndex];
+  const selectedStage = selectedIndex !== null ? STAGES[selectedIndex] : null;
+  const selectedIsCurrent = selectedIndex === game.stageIndex;
+  const temptation = (stageItem, index) => {
+    if (stageItem.final) return "最終精算前、最大の踏み込み";
+    if (stageItem.interestRate) return `${Math.round(stageItem.interestRate * 100)}%徴収 / 契約獲得`;
+    if (index === 1) return "5チェインで利益+100";
+    if (index === 3) return "8チェインで利益+200";
+    if (index === 4) return "赤以上で報酬4択";
+    if (index === 6) return "10チェインで追加ダメージ";
+    if (index === 7) return "黒勝利で最終利益+500";
+    return "安全に見える、もう1戦";
+  };
+  const dangerSkulls = (stageItem, index) => Math.min(5, (stageItem.final ? 5 : stageItem.type ? 4 : 2) + (index >= 6 ? 1 : 0));
 
   return (
     <section className="mapScreen">
       <header className="mapHeader">
-        <div className="mapLogo">
-          <span>貸した魔力は</span>
-          <strong>リボ払いで強制徴収</strong>
-          <em>借金で快楽を前借りするローグライク</em>
+        <div className="mapStateCard compact">
+          <span>現在利益</span>
+          <strong className="profitText">¥ {formatMoney(game.totalProfit)}</strong>
+          <small>現在借金 <b className="debtText">¥ {formatMoney(game.totalDebt)}</b></small>
         </div>
-        <div className="mapStats">
-          <div><span>総利益</span><strong className="profitText">{formatMoney(game.totalProfit)}</strong></div>
-          <div><span>総借金</span><strong className="debtText">{formatMoney(game.totalDebt)}</strong></div>
-          <div><span>所持金</span><strong>{formatMoney(cash)}</strong></div>
-          <div className="mapDebtMeter">
-            <span>借金ゲージ</span>
-            <div className="segmentedGauge">
-              <span className="segmentBlue" />
-              <span className="segmentYellow" />
-              <span className="segmentRed" />
-              <span className="segmentBlack" />
-              <em style={{ left: `${debtPercent}%` }} />
-            </div>
-            <strong>現在の状態：{debtState.label}（{debtState.text}）</strong>
+        <div className="mapStateCard final">
+          <span>予測最終利益</span>
+          <strong className={predictedFinal >= 0 ? "profitText" : "debtText"}>{predictedFinal >= 0 ? "+" : "-"}¥ {formatMoney(Math.abs(predictedFinal))}</strong>
+          <small>生還ラインを常に確認</small>
+        </div>
+        <div className={`mapStateCard overdrive ${debtState.id}`}>
+          <span>借金暴走度</span>
+          <strong>{debtPercent}%</strong>
+          <em>{debtState.label} / {debtState.text}</em>
+          <div className="mapOverdriveGauge">
+            <i style={{ width: `${debtPercent}%` }} />
           </div>
         </div>
       </header>
 
-      <aside className="mapPlayerPanel">
-        <div className="mapPortrait"><span>{character.name}</span></div>
-        <div className="mapInfoCard"><small>プレイヤーHP</small><strong>❤️ {game.hp}<em>/ {PLAYER_MAX_HP}</em></strong></div>
-        <div className="mapInfoCard"><small>現在ステージ</small><strong>⚑ {game.stageIndex + 1}<em>/ 9</em></strong></div>
-        <div className="mapContracts">
-          <small>所持契約</small>
-          <div>
-            {(game.contracts.length ? game.contracts : CONTRACTS.slice(0, 8)).slice(0, 8).map((contract, index) => (
-              <span key={`${contract.id}-${index}`}>{contract.icon}</span>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <nav className="mapSideMenu" aria-label="マップメニュー">
-        {mapMenus.map((item, index) => (
-          <button key={item} type="button">
-            <span>{["▱", "☑", "🛒", "▤", "⚙"][index]}</span>
-            {item}
-            {index === 1 && <em>!</em>}
-          </button>
-        ))}
-      </nav>
-
       <div className="mapRail">
         {STAGES.map((stageItem, index) => {
-          const isBoss = stageItem.type;
+          const isBoss = stageItem.type || stageItem.final;
+          const isCurrent = index === game.stageIndex;
+          const isDone = index < game.stageIndex;
           return (
-            <div
-              className={`mapNode ${index === game.stageIndex ? "current" : ""} ${index < game.stageIndex ? "done" : ""} ${isBoss ? "boss" : ""} ${stageItem.final ? "final" : ""}`}
+            <button
+              type="button"
+              disabled={!isCurrent}
+              onClick={() => setSelectedIndex(index)}
+              className={`mapNode ${isCurrent ? "current" : ""} ${isDone ? "done" : ""} ${index > game.stageIndex ? "locked" : ""} ${isBoss ? "boss" : ""} ${stageItem.final ? "final" : ""} ${selectedIndex === index ? "selected" : ""}`}
               key={stageItem.name}
             >
-              <i>{index + 1}</i>
               <span className="nodeSigil">{stageItem.final ? "♛" : isBoss ? "▣" : "⚔"}</span>
               <div>
                 <strong>{stageItem.name}</strong>
-                <small>{stageItem.type || "通常戦"} / 推奨レベル {5 + index * 3}</small>
+                <small>{isCurrent ? "現在の欲張り先" : isDone ? "徴収済み" : temptation(stageItem, index)}</small>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
 
-      <div className="mapDecor decorContract">魔力契約書<br />利息は全てあなたのものになります</div>
-      <div className="mapDecor decorInvoice">請求書<br />元金 利息 延滞損害金</div>
+      <aside className="mapTemptation">
+        <span>次の誘惑</span>
+        <strong>{currentStage.name}</strong>
+        <em>{temptation(currentStage, game.stageIndex)}</em>
+        <small>HP {game.hp}/{PLAYER_MAX_HP} / 契約 {game.contracts.length}</small>
+      </aside>
 
-      <footer className="mapFooter">
-        <button className="backButton" type="button" aria-label="戻る">‹</button>
-        <button className="prepareButton" type="button" onClick={onNext}>⚔ 次ノード選択 <span>{STAGES[game.stageIndex].name}へ進みます</span></button>
+      <footer className={`mapNodeSheet ${selectedStage ? "open" : ""}`}>
+        {selectedStage ? (
+          <>
+            <div className="sheetIcon">{selectedStage.final ? "♛" : selectedStage.type ? "▣" : "⚔"}</div>
+            <div className="sheetMain">
+              <span>{selectedStage.type || "通常戦"} / STAGE {selectedIndex + 1}</span>
+              <strong>{selectedStage.name}</strong>
+              <p>{selectedStage.rule || temptation(selectedStage, selectedIndex)}</p>
+              <div className="sheetTags">
+                <b>危険度 {"💀".repeat(dangerSkulls(selectedStage, selectedIndex))}</b>
+                <b>報酬傾向 {selectedStage.final ? "最終契約" : selectedStage.interestRate ? "徴収+契約" : "契約強化"}</b>
+              </div>
+            </div>
+            <button className="prepareButton" type="button" disabled={!selectedIsCurrent} onClick={onNext}>
+              進む
+              <span>{selectedIsCurrent ? "あと1回ならいける" : "現在地からは選べません"}</span>
+            </button>
+          </>
+        ) : (
+          <button className="mapHintButton" type="button" onClick={() => setSelectedIndex(game.stageIndex)}>
+            現在ノードをタップして、欲張るか判断
+          </button>
+        )}
       </footer>
     </section>
   );
