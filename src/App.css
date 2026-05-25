@@ -1339,8 +1339,8 @@ button {
   position: relative;
   height: 100%;
   display: grid;
-  grid-template-rows: 76px 136px 52px minmax(190px, 1fr) 58px 20px;
-  gap: 6px;
+  grid-template-rows: 76px 52px minmax(228px, 1fr) 54px;
+  gap: 8px;
   overflow: hidden;
 }
 
@@ -1356,19 +1356,17 @@ button {
 }
 
 .battleHeader,
-.battleHero,
 .puzzleZone,
 .battleDebtRow,
-.battleFooter,
-.battleMessage {
+.battleFooter {
   position: relative;
   z-index: 1;
 }
 
 .battleHeader {
   display: grid;
-  grid-template-columns: 58px 1fr 108px;
-  gap: 6px;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -1380,15 +1378,10 @@ button {
 .stageStack div,
 .enemyPanel,
 .playerPanel,
-.bonusLadder,
-.chainSide > div,
-.chainSide button,
 .battleTotals > div,
 .wideGauge,
 .interestRate,
-.contractShelf,
-.endTurnButton,
-.battleMessage {
+.contractShelf {
   border: 1px solid rgba(126, 230, 255, 0.28);
   border-radius: 8px;
   background: linear-gradient(180deg, rgba(7, 25, 60, 0.86), rgba(3, 13, 33, 0.74));
@@ -1403,8 +1396,6 @@ button {
 
 .stageStack span,
 .playerPanel span,
-.bonusLadder strong,
-.chainSide span,
 .battleTotals span,
 .contractShelf > span,
 .interestRate span {
@@ -1424,8 +1415,7 @@ button {
 .enemyPanel em,
 .playerPanel em,
 .battleTotals em,
-.interestRate em,
-.endTurnButton span {
+.interestRate em {
   color: rgba(244, 248, 255, 0.74);
   font-size: 11px;
   font-style: normal;
@@ -1493,114 +1483,15 @@ button {
 
 .playerPanel {
   display: grid;
-  align-content: start;
-  gap: 4px;
-  padding: 6px;
-}
-
-.playerPanel button {
-  min-height: 24px;
-  border: 1px solid rgba(126, 230, 255, 0.34);
-  border-radius: 7px;
-  color: var(--white);
-  font-size: 11px;
-  font-weight: 1000;
-  background: rgba(3, 20, 48, 0.82);
+  align-content: center;
+  gap: 5px;
+  padding: 8px;
 }
 
 .playerPanel strong {
   color: var(--white);
   font-size: 22px;
   line-height: 0.95;
-}
-
-.battleHero {
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto 1fr;
-  gap: 6px;
-  overflow: hidden;
-}
-
-.battleHero .debtBox {
-  align-self: start;
-}
-
-.battleFigure {
-  position: relative;
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
-  justify-self: center;
-  align-self: end;
-  width: 54%;
-  height: 100%;
-  min-height: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(126, 230, 255, 0.4), transparent 35%),
-    radial-gradient(circle at 50% 58%, rgba(77, 166, 255, 0.14), transparent 48%);
-}
-
-.battleFigure::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 72px;
-  height: 92px;
-  border-radius: 62px 62px 18px 18px;
-  background: linear-gradient(180deg, #071326, #020815);
-  box-shadow: 0 0 30px rgba(77, 166, 255, 0.34);
-  transform: translateX(-50%) rotate(-3deg);
-}
-
-.battleFigure::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  width: 48px;
-  height: 50px;
-  border-radius: 50%;
-  background: #020815;
-  box-shadow: -10px -8px 0 #071326, 0 0 18px rgba(155, 107, 255, 0.42);
-  transform: translateX(-50%);
-}
-
-.battleFigure span {
-  position: absolute;
-  left: 54%;
-  bottom: 20px;
-  width: 88px;
-  height: 28px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(244, 248, 255, 0.92), rgba(126, 230, 255, 0.58));
-  box-shadow: 0 0 22px rgba(126, 230, 255, 0.54);
-  transform: rotate(-13deg);
-}
-
-.battleFigure i {
-  position: absolute;
-  inset: 24px 24px 0;
-  border-radius: 50%;
-  border: 1px solid rgba(126, 230, 255, 0.32);
-  box-shadow: inset 0 0 30px rgba(77, 166, 255, 0.18);
-}
-
-.speechBubble {
-  grid-column: 3;
-  grid-row: 1;
-  align-self: center;
-  padding: 6px 8px;
-  color: #0b2a5d;
-  font-size: 12px;
-  font-weight: 1000;
-  line-height: 1.45;
-  text-align: center;
-  clip-path: polygon(6% 18%, 90% 8%, 100% 34%, 90% 76%, 18% 86%, 0 62%);
-  background: var(--white);
-  box-shadow: 0 0 24px rgba(244, 248, 255, 0.32);
 }
 
 .profitText {
@@ -1613,57 +1504,15 @@ button {
 
 .puzzleZone {
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr) 70px;
-  gap: 6px;
-  align-items: stretch;
+  place-items: center;
   min-height: 0;
   overflow: hidden;
 }
 
-.bonusLadder {
-  display: grid;
-  gap: 3px;
-  align-content: stretch;
-  padding: 5px 4px;
-  text-align: center;
-}
-
-.bonusLadder strong {
-  color: var(--white);
-  line-height: 1.2;
-}
-
-.bonusLadder span {
-  display: grid;
-  place-items: center;
-  min-height: 27px;
-  border-top: 1px solid rgba(126, 230, 255, 0.18);
-  color: rgba(244, 248, 255, 0.82);
-  font-size: 10px;
-  font-weight: 1000;
-}
-
-.bonusLadder b {
-  color: rgba(244, 248, 255, 0.72);
-  font-size: 12px;
-}
-
-.bonusLadder .active {
-  border: 1px solid rgba(255, 210, 74, 0.72);
-  border-radius: 8px;
-  color: var(--profit-gold);
-  background: rgba(255, 210, 74, 0.12);
-  box-shadow: 0 0 18px rgba(255, 210, 74, 0.28);
-}
-
-.bonusLadder .active b {
-  color: var(--profit-gold);
-}
-
 .board {
   position: relative;
-  width: min(100%, 190px);
-  height: 190px;
+  width: min(100%, 244px);
+  height: auto;
   aspect-ratio: 1;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -1686,7 +1535,7 @@ button {
   left: 50%;
   top: 7px;
   z-index: 4;
-  width: min(78%, 156px);
+  width: min(78%, 190px);
   max-height: 46px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1801,40 +1650,6 @@ button {
   box-shadow: inset 0 0 0 1px rgba(255, 92, 92, 0.28);
 }
 
-.chainSide {
-  display: grid;
-  gap: 6px;
-  align-content: stretch;
-}
-
-.chainSide > div,
-.chainSide button {
-  display: grid;
-  place-items: center;
-  padding: 6px 4px;
-  text-align: center;
-}
-
-.chainSide strong {
-  color: var(--white);
-  font-size: 15px;
-  line-height: 1.1;
-}
-
-.chainSide em {
-  display: block;
-  color: rgba(244, 248, 255, 0.72);
-  font-size: 10px;
-  font-style: normal;
-}
-
-.chainSide button {
-  border: 1px solid rgba(126, 230, 255, 0.26);
-  color: var(--white);
-  font-size: 11px;
-  font-weight: 1000;
-}
-
 .battleTotals {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1868,15 +1683,13 @@ button {
 }
 
 .battleDebtRow {
-  display: grid;
-  grid-template-columns: 1fr 80px;
-  gap: 6px;
+  display: block;
 }
 
 .wideGauge {
   display: grid;
-  gap: 4px;
-  padding: 5px 8px;
+  gap: 6px;
+  padding: 7px 10px;
 }
 
 .wideGauge > strong {
@@ -1888,98 +1701,40 @@ button {
   height: 13px;
 }
 
-.gaugeLabels {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  color: rgba(244, 248, 255, 0.76);
-  font-size: 10px;
-  font-weight: 900;
-  text-align: center;
-}
-
-.interestRate {
-  display: grid;
-  place-items: center;
-  padding: 6px;
-  text-align: center;
-}
-
-.interestRate strong {
-  color: var(--debt-red);
-  font-size: 14px;
-}
-
-.interestRate em {
-  color: #ff9aa1;
-  font-size: 16px;
-  font-weight: 1000;
-}
-
 .battleFooter {
-  display: grid;
-  grid-template-columns: 1fr 128px;
-  gap: 6px;
-  min-height: 64px;
+  display: block;
+  min-height: 54px;
 }
 
 .contractShelf {
   min-width: 0;
-  display: grid;
-  gap: 4px;
-  padding: 6px;
+  display: block;
+  padding: 8px;
 }
 
 .contractShelf div {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 
 .contractShelf i {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-  justify-items: center;
-  color: rgba(244, 248, 255, 0.84);
-  font-size: 8px;
+  display: block;
+  color: var(--white);
   font-style: normal;
-  font-weight: 900;
 }
 
 .contractShelf b {
-  width: 22px;
-  height: 22px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(126, 230, 255, 0.32);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--white);
+  font-size: 14px;
   background: rgba(155, 107, 255, 0.32);
   box-shadow: 0 0 14px rgba(155, 107, 255, 0.22);
-}
-
-.endTurnButton {
-  border-color: rgba(126, 230, 255, 0.58);
-  color: var(--white);
-  font-size: 16px;
-  font-weight: 1000;
-  background: linear-gradient(180deg, rgba(126, 230, 255, 0.28), rgba(24, 100, 218, 0.76));
-  box-shadow: 0 0 24px rgba(77, 166, 255, 0.42), inset 0 0 0 1px rgba(244, 248, 255, 0.22);
-}
-
-.endTurnButton span {
-  display: block;
-  margin-top: 3px;
-}
-
-.battleMessage {
-  overflow: hidden;
-  padding: 5px 8px;
-  color: rgba(244, 248, 255, 0.78);
-  font-size: 10px;
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .bottomHud {

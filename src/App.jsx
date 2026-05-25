@@ -1162,22 +1162,12 @@ export default function App() {
 
   const debtState = getDebtState(game.totalDebt);
   const chainPiece = game.path[0] ? getPiece(game.board[game.path[0].row][game.path[0].col]) : null;
-  const threshold = nextChainBonusThreshold(game.path.length);
   const enemyHpPercent = Math.max(0, (game.enemyHp / stage.hp) * 100);
   const hpPercent = Math.max(0, (game.hp / PLAYER_MAX_HP) * 100);
-  const debtPercent = Math.min(100, (game.totalDebt / MAX_DEBT) * 100);
-  const dangerLabel = debtState.id === "blue" ? "安全" : debtState.id === "yellow" ? "警戒" : debtState.id === "red" ? "危険域" : "限界";
-  const nextThresholdLabel = threshold ? `${threshold}チェイン` : "欲望暴走中";
   const stretchPreview = calculateTurn(game, game.path.length + 1);
   const compareThreshold = nextChainBonusThreshold(game.path.length);
   const compareNeed = compareThreshold ? compareThreshold - game.path.length : 0;
   const showChainCompare = game.path.length > 0;
-  const bonusRows = [
-    { label: "5+", multiplier: "利益+50", active: game.path.length >= 5 && game.path.length < 8 },
-    { label: "8+", multiplier: "利益+150 借金+100", active: game.path.length >= 8 && game.path.length < 10 },
-    { label: "10+", multiplier: "利益+300 借金+300", active: game.path.length >= 10 && game.path.length < 12 },
-    { label: "12+", multiplier: "欲望暴走", active: game.path.length >= 12 },
-  ];
 
   return (
     <main className={`app debt-${debtState.id}`}>
@@ -1195,33 +1185,17 @@ export default function App() {
         {game.screen === "battle" && (
           <section className="battleScreen">
             <header className="battleHeader">
-              <div className="stageStack">
-                <div><span>STAGE</span><strong>{game.stageIndex + 1}<em>/9</em></strong></div>
-                <div><span>TURN</span><strong>{game.turn}</strong></div>
-              </div>
-              <div className="enemyPanel">
-                <h1><span>{stage.type || "通常戦"}</span>{stage.name}</h1>
-                <div className="enemyBar"><i style={{ width: `${enemyHpPercent}%` }} /></div>
-                <strong>{formatMoney(game.enemyHp)} <em>/ {formatMoney(stage.hp)}</em></strong>
-              </div>
               <div className="playerPanel">
-                <button type="button">☰ メニュー</button>
                 <span>PLAYER HP</span>
                 <strong>{game.hp}<em>/ {PLAYER_MAX_HP}</em></strong>
                 <div className="hpBar"><i style={{ width: `${hpPercent}%` }} /></div>
               </div>
-            </header>
-
-            <section className="battleHero">
-              <DebtGauge debt={game.totalDebt} previewDebt={previewDebt} />
-              <div className="battleFigure" aria-hidden="true">
-                <span />
-                <i />
+              <div className="enemyPanel">
+                <h1><span>ENEMY HP</span>{stage.name}</h1>
+                <div className="enemyBar"><i style={{ width: `${enemyHpPercent}%` }} /></div>
+                <strong>{formatMoney(game.enemyHp)} <em>/ {formatMoney(stage.hp)}</em></strong>
               </div>
-              <div className="speechBubble">もっと借りて、<br />もっと強くなろうぜ？</div>
-            </section>
-
-            {debtState.id === "black" && <div className="feverBanner">欲望暴走</div>}
+            </header>
 
             <section className="battleDebtRow">
               <div className="wideGauge">
@@ -1233,18 +1207,10 @@ export default function App() {
                   <span className="segmentBlack" />
                   <em style={{ left: `${Math.min(100, (previewDebt / MAX_DEBT) * 100)}%` }} />
                 </div>
-                <div className="gaugeLabels"><span>安全</span><span>警戒</span><span>危険</span><span>限界</span></div>
               </div>
-              <div className="interestRate"><span>危険度</span><strong>{dangerLabel}</strong><em>{debtPercent.toFixed(0)}%</em></div>
             </section>
 
             <section className="puzzleZone">
-              <aside className="bonusLadder">
-                <strong>チェイン<br />ボーナス</strong>
-                {bonusRows.map((row) => (
-                  <span className={row.active ? "active" : ""} key={row.label}>{row.label}<b>{row.multiplier}</b></span>
-                ))}
-              </aside>
               <section className="board" ref={boardRef} onPointerMove={(event) => game.dragging && addCell(moveToCell(event.clientX, event.clientY))} onPointerUp={finishChain} onPointerCancel={finishChain}>
                 {showChainCompare && (
                   <div className="chainComparePopover" aria-live="polite">
@@ -1287,25 +1253,17 @@ export default function App() {
                   })
                 )}
               </section>
-              <aside className="chainSide">
-                <div><span>次の閾値</span><strong>{nextThresholdLabel}</strong></div>
-                <div><span>現在チェイン</span><strong>{game.path.length}<em>CHAIN</em></strong></div>
-                <button type="button" onClick={reset}>↻ リセット</button>
-              </aside>
             </section>
 
             <footer className="battleFooter">
               <div className="contractShelf">
-                <span>所持契約</span>
                 <div>
                   {(game.contracts.length ? game.contracts : CONTRACTS.slice(0, 6)).slice(0, 6).map((contract, index) => (
-                    <i key={`${contract.id}-${index}`}><b>{contract.icon}</b>{contract.name}</i>
+                    <i key={`${contract.id}-${index}`} aria-label={contract.name}><b>{contract.icon}</b></i>
                   ))}
                 </div>
               </div>
-              <button className="endTurnButton" type="button" onClick={finishChain}>⚔ ターン終了 <span>チェイン確定</span></button>
             </footer>
-            <div className="battleMessage">{game.message}</div>
           </section>
         )}
 
