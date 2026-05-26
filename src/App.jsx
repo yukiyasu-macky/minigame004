@@ -36,7 +36,7 @@ const STAGES = [
   { name: "通常戦2", hp: 150, attack: 7, rule: "5チェイン以上で利益+100。" },
   { name: "税務執行者", type: "小ボス", hp: 500, attack: 15, interestRate: 0.1 },
   { name: "通常戦4", hp: 220, attack: 10, rule: "8チェイン以上で利益+200、敵攻撃+10。" },
-  { name: "通常戦5", hp: 300, attack: 12, rule: "赤状態以上で勝利すると報酬4択。" },
+  { name: "通常戦5", hp: 300, attack: 12, rule: "赤状態以上で勝利するとレア契約率UP。" },
   { name: "回収監査官", type: "中ボス", hp: 1200, attack: 25, interestRate: 0.25 },
   { name: "通常戦7", hp: 500, attack: 18, rule: "10チェイン以上で追加ダメージ+500、借金+500。" },
   { name: "通常戦8", hp: 700, attack: 22, rule: "黒状態で勝利すると最終利益+500。" },
@@ -48,7 +48,7 @@ const CONTRACTS = [
   { id: "runawayMana", name: "暴走魔力", icon: "暴", text: "借金80%以上で利益+100%" },
   { id: "pleasureAddiction", name: "快楽依存", icon: "快", text: "8チェイン以上で次ターン利益+50%" },
   { id: "debtDodger", name: "踏み倒し", icon: "踏", text: "黒状態中、利息-50%" },
-  { id: "overInvest", name: "過剰投資", icon: "投", text: "借金3000以上で報酬4択" },
+  { id: "overInvest", name: "過剰投資", icon: "投", text: "借金3000以上でレア契約率UP" },
   { id: "prepayRuin", name: "破滅の先払い", icon: "破", text: "即座に借金+1000 / 以後、利益+100%" },
   { id: "desireRush", name: "欲望暴走", icon: "走", text: "10チェイン以上で追加ダメージ+300 / 借金+500" },
   { id: "blackMarket", name: "黒市場", icon: "市", text: "赤状態以上で勝利するとレア契約率UP" },
@@ -114,12 +114,13 @@ const effectiveContracts = (game) => {
 
 const hasContract = (contracts, id) => countContract(contracts, id) > 0;
 
-const getRewardCount = (game, defeatedDebtState = getDebtState(game.totalDebt)) => {
+const shouldPreferRareRewards = (game, defeatedDebtState = getDebtState(game.totalDebt)) => {
   const contracts = effectiveContracts(game);
-  if (hasContract(contracts, "overInvest") && game.totalDebt >= 3000) return 4;
-  if (game.stageIndex === 4 && ["red", "black"].includes(defeatedDebtState.id)) return 4;
-  if (hasContract(contracts, "blackMarket") && ["red", "black"].includes(defeatedDebtState.id)) return 4;
-  return 3;
+  return (
+    (hasContract(contracts, "overInvest") && game.totalDebt >= 3000) ||
+    (game.stageIndex === 4 && ["red", "black"].includes(defeatedDebtState.id)) ||
+    (hasContract(contracts, "blackMarket") && ["red", "black"].includes(defeatedDebtState.id))
+  );
 };
 
 const createFinalSettlement = (game, draft, finalContract, gambleWin = false) => {
@@ -253,12 +254,12 @@ const addCursePieces = (board, count) => {
   return next;
 };
 
-const randomRewards = (count = 3, preferRare = false) => {
+const randomRewards = (preferRare = false) => {
   const rareIds = ["prepayRuin", "desireRush", "blackMarket", "overInvest"];
   const pool = preferRare
     ? [...CONTRACTS].sort((a, b) => (rareIds.includes(b.id) ? 1 : 0) - (rareIds.includes(a.id) ? 1 : 0) || Math.random() - 0.5)
     : [...CONTRACTS].sort(() => Math.random() - 0.5);
-  return pool.slice(0, count);
+  return pool.slice(0, 3);
 };
 
 const initialGame = () => ({
@@ -435,7 +436,7 @@ function MapScreen({ game, onNext }) {
     if (stageItem.interestRate) return `${Math.round(stageItem.interestRate * 100)}%徴収 / 契約獲得`;
     if (index === 1) return "5チェインで利益+100";
     if (index === 3) return "8チェインで利益+200";
-    if (index === 4) return "赤以上で報酬4択";
+    if (index === 4) return "赤以上でレア契約率UP";
     if (index === 6) return "10チェインで追加ダメージ";
     if (index === 7) return "黒勝利で最終利益+500";
     return "安全に見える、もう1戦";
@@ -580,7 +581,7 @@ function RewardScreen({ game, onChoose }) {
         <p>この選択が、君の未来を決める。</p>
       </section>
 
-      <section className={`rewardCards rewardCount${game.rewards.length}`}>
+      <section className="rewardCards">
         {game.rewards.map((contract, index) => {
           const style = rewardStyles[index] || rewardStyles[2];
           const parts = contract.text.split(" / ");
@@ -697,7 +698,7 @@ function InterimReportScreen({ game, onNext }) {
       </section>
 
       <footer className="interimActions">
-        <button type="button" onClick={onNext}>契約を選ぶ <span>報酬{game.rewards.length}択へ進む</span></button>
+        <button type="button" onClick={onNext}>契約を選ぶ <span>報酬3択へ進む</span></button>
       </footer>
     </section>
   );
@@ -1047,8 +1048,7 @@ export default function App() {
         }
 
         const defeatedDebtState = getDebtState(totalDebt);
-        const rewardCount = getRewardCount({ ...current, totalDebt }, defeatedDebtState);
-        const preferRare = hasContract(effectiveContracts(current), "blackMarket") && ["red", "black"].includes(defeatedDebtState.id);
+        const preferRare = shouldPreferRareRewards({ ...current, totalDebt }, defeatedDebtState);
         const finalProfitBonus = current.finalProfitBonus + (current.stageIndex === 7 && defeatedDebtState.id === "black" ? 500 : 0);
 
         return {
@@ -1070,7 +1070,7 @@ export default function App() {
           pleasureBoost: hasContract(effectiveContracts(current), "pleasureAddiction") && current.path.length >= 8,
           finalProfitBonus,
           screen: "interim",
-          rewards: randomRewards(rewardCount, preferRare),
+          rewards: randomRewards(preferRare),
           lastTurn: result,
           message: `${stage.name}を撃破。${message}`,
         };

@@ -1959,11 +1959,6 @@ button {
   overflow: hidden;
 }
 
-.rewardCards.rewardCount4 {
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-}
-
 .rewardCard {
   position: relative;
   min-width: 0;
@@ -1978,12 +1973,6 @@ button {
   color: var(--white);
   text-align: left;
   background: rgba(4, 15, 39, 0.82);
-}
-
-.rewardCards.rewardCount4 .rewardCard {
-  grid-template-rows: 16px 18px 34px 30px 50px 26px 20px;
-  gap: 2px;
-  padding: 5px;
 }
 
 .rewardCard::before {
@@ -2050,12 +2039,6 @@ button {
   box-shadow: 0 0 20px color-mix(in srgb, currentColor 46%, transparent);
 }
 
-.rewardCards.rewardCount4 .rewardIcon {
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-}
-
 .rewardCard h3 {
   margin: 0;
   color: var(--white);
@@ -2063,10 +2046,6 @@ button {
   font-size: 14px;
   line-height: 1.12;
   text-align: center;
-}
-
-.rewardCards.rewardCount4 .rewardCard h3 {
-  font-size: 11px;
 }
 
 .rewardCard p {
@@ -2105,26 +2084,6 @@ button {
   color: currentColor;
   font-size: 11px;
   font-weight: 1000;
-}
-
-.rewardCards.rewardCount4 .rewardCard dd {
-  font-size: 9px;
-}
-
-.rewardCards.rewardCount4 .synergy {
-  gap: 2px;
-}
-
-.rewardCards.rewardCount4 .synergy span {
-  grid-template-columns: 14px 1fr;
-  gap: 2px;
-  padding: 1px;
-  font-size: 7px;
-}
-
-.rewardCards.rewardCount4 .synergy i {
-  width: 14px;
-  height: 14px;
 }
 
 .synergy {
