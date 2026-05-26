@@ -2,15 +2,23 @@ import { useMemo, useRef, useState } from "react";
 import "./App.css";
 
 const BOARD_SIZE = 6;
-const MAX_DEBT = 5000;
-const PLAYER_MAX_HP = 100;
-
 const BALANCE = {
+  playerMaxHp: 160,
+  maxDebt: 5000,
   enemyMultiplier: 10,
   riskMultiplier: 1,
   attackMultiplier: 0.2,
+  redEnemyAttackMultiplier: 1.1,
   finalInterestRate: 0,
+  chainBonuses: [
+    { chain: 12, profit: 600, debt: 800, label: "欲望暴走" },
+    { chain: 10, profit: 300, debt: 300, label: "超ボーナス" },
+    { chain: 8, profit: 150, debt: 100, label: "上振れ" },
+    { chain: 5, profit: 50, debt: 0, label: "小ボーナス" },
+  ],
 };
+const MAX_DEBT = BALANCE.maxDebt;
+const PLAYER_MAX_HP = BALANCE.playerMaxHp;
 
 const PIECES = [
   { id: "red", label: "赤", color: "#FF5C5C" },
@@ -32,15 +40,15 @@ const CHARACTERS = [
 ];
 
 const STAGES = [
-  { name: "通常戦1", hp: 100, attack: 5, rule: "チュートリアル。特殊ルールなし。" },
-  { name: "通常戦2", hp: 150, attack: 7, rule: "5チェイン以上で利益+100。" },
-  { name: "税務執行者", type: "小ボス", hp: 500, attack: 15, interestRate: 0.1 },
-  { name: "通常戦4", hp: 220, attack: 10, rule: "8チェイン以上で利益+200、敵攻撃+10。" },
-  { name: "通常戦5", hp: 300, attack: 12, rule: "赤状態以上で勝利するとレア契約率UP。" },
-  { name: "回収監査官", type: "中ボス", hp: 1200, attack: 25, interestRate: 0.25 },
-  { name: "通常戦7", hp: 500, attack: 18, rule: "10チェイン以上で追加ダメージ+500、借金+500。" },
-  { name: "通常戦8", hp: 700, attack: 22, rule: "黒状態で勝利すると最終利益+500。" },
-  { name: "徴収王", type: "ラスボス", hp: 3000, attack: 40, final: true },
+  { name: "通常戦1", hp: 90, attack: 4, rule: "チュートリアル。特殊ルールなし。" },
+  { name: "通常戦2", hp: 130, attack: 5, rule: "5チェイン以上で利益+100。" },
+  { name: "税務執行者", type: "小ボス", hp: 430, attack: 11, interestRate: 0.1 },
+  { name: "通常戦4", hp: 190, attack: 8, rule: "8チェイン以上で利益+200、敵攻撃+10。" },
+  { name: "通常戦5", hp: 260, attack: 9, rule: "赤状態以上で勝利するとレア契約率UP。" },
+  { name: "回収監査官", type: "中ボス", hp: 1000, attack: 19, interestRate: 0.25 },
+  { name: "通常戦7", hp: 430, attack: 14, rule: "10チェイン以上で追加ダメージ+500、借金+500。" },
+  { name: "通常戦8", hp: 600, attack: 17, rule: "黒状態で勝利すると最終利益+500。" },
+  { name: "徴収王", type: "ラスボス", hp: 2600, attack: 30, final: true },
 ];
 
 const CONTRACTS = [
@@ -55,6 +63,7 @@ const CONTRACTS = [
   { id: "lifeCut", name: "命削り", icon: "命", text: "毎ターンHP-5 / 利益+50%" },
   { id: "interestRefund", name: "利息還元", icon: "還", text: "支払利息20%を利益変換" },
   { id: "lazyDeal", name: "怠惰契約", icon: "怠", text: "5チェイン以下で利益+50%" },
+  { id: "lifeFinance", name: "延命融資", icon: "延", text: "戦闘勝利時HP+15 / 借金+100" },
 ];
 
 const FINAL_CONTRACTS = [
@@ -84,7 +93,7 @@ const makeBoard = () => {
 const getDebtState = (debt) => {
   const ratio = Math.max(0, Math.min(1, debt / MAX_DEBT));
   if (ratio > 0.8) return { id: "black", label: "黒", text: "利益+100% / ダメージ+100% / 利息+50%", color: "#1A1A1A" };
-  if (ratio > 0.5) return { id: "red", label: "赤", text: "利益+50% / 敵攻撃+20%", color: "#FF5C5C" };
+  if (ratio > 0.5) return { id: "red", label: "赤", text: "利益+50% / 敵攻撃+10%", color: "#FF5C5C" };
   if (ratio > 0.25) return { id: "yellow", label: "黄", text: "利益+20% / 利息+10%", color: "#FFD24A" };
   return { id: "blue", label: "青", text: "通常", color: "#4DA6FF" };
 };
@@ -100,10 +109,8 @@ const getThresholdBonus = (chain) => {
 const nextChainBonusThreshold = (chain) => [5, 8, 10, 12].find((value) => chain < value);
 
 const getChainFlatBonus = (chain) => {
-  if (chain >= 12) return { profit: 600, debt: 800, label: "欲望暴走" };
-  if (chain >= 10) return { profit: 300, debt: 300, label: "超ボーナス" };
-  if (chain >= 8) return { profit: 150, debt: 100, label: "上振れ" };
-  if (chain >= 5) return { profit: 50, debt: 0, label: "小ボーナス" };
+  const bonus = BALANCE.chainBonuses.find((item) => chain >= item.chain);
+  if (bonus) return { profit: bonus.profit, debt: bonus.debt, label: bonus.label };
   return { profit: 0, debt: 0, label: "" };
 };
 
@@ -1047,6 +1054,13 @@ export default function App() {
           message = interestResult.note;
         }
 
+        const lifeFinanceCount = countContract(effectiveContracts(current), "lifeFinance");
+        if (lifeFinanceCount > 0) {
+          hp = Math.min(PLAYER_MAX_HP, hp + lifeFinanceCount * 15);
+          totalDebt = Math.min(MAX_DEBT, totalDebt + lifeFinanceCount * 100);
+          message = `${message} 延命融資でHP回復、借金追加。`;
+        }
+
         const defeatedDebtState = getDebtState(totalDebt);
         const preferRare = shouldPreferRareRewards({ ...current, totalDebt }, defeatedDebtState);
         const finalProfitBonus = current.finalProfitBonus + (current.stageIndex === 7 && defeatedDebtState.id === "black" ? 500 : 0);
@@ -1078,7 +1092,7 @@ export default function App() {
 
       const debtState = getDebtState(totalDebt);
       const stageAttackBonus = current.stageIndex === 3 && current.path.length >= 8 ? 10 : 0;
-      const enemyAttack = Math.round((stage.attack + stageAttackBonus) * (debtState.id === "red" ? 1.2 : 1));
+      const enemyAttack = Math.round((stage.attack + stageAttackBonus) * (debtState.id === "red" ? BALANCE.redEnemyAttackMultiplier : 1));
       hp = Math.max(0, hp - enemyAttack);
       const noDamageTurns = enemyAttack > 0 ? 0 : current.noDamageTurns + 1;
 
