@@ -304,7 +304,7 @@ const initialGame = () => ({
 
 function TitleScreen({ onStart }) {
   return (
-    <section className="homeScreen">
+    <section className="homeScreen screen">
       <div className="homeSparkles" aria-hidden="true">
         <span />
         <span />
@@ -360,7 +360,7 @@ function CharacterSelect({ selectedId, onSelect, onNext }) {
   const selected = CHARACTERS.find((character) => character.id === selectedId) || CHARACTERS[0];
 
   return (
-    <section className="characterScreen">
+    <section className="characterScreen screen">
       <header className="selectHeader">
         <button className="backButton" type="button" aria-label="戻る">‹</button>
         <div>
@@ -451,7 +451,7 @@ function MapScreen({ game, onNext }) {
   const dangerSkulls = (stageItem, index) => Math.min(5, (stageItem.final ? 5 : stageItem.type ? 4 : 2) + (index >= 6 ? 1 : 0));
 
   return (
-    <section className="mapScreen">
+    <section className="mapScreen screen">
       <header className="mapHeader">
         <div className="mapStateCard compact">
           <span>現在利益</span>
@@ -506,6 +506,7 @@ function MapScreen({ game, onNext }) {
       <footer className={`mapNodeSheet ${selectedStage ? "open" : ""}`}>
         {selectedStage ? (
           <>
+            <button className="sheetClose" type="button" onClick={() => setSelectedIndex(null)} aria-label="閉じる">×</button>
             <div className="sheetIcon">{selectedStage.final ? "♛" : selectedStage.type ? "▣" : "⚔"}</div>
             <div className="sheetMain">
               <span>{selectedStage.type || "通常戦"} / STAGE {selectedIndex + 1}</span>
@@ -564,7 +565,7 @@ function RewardScreen({ game, onChoose }) {
   const ownedContracts = game.contracts.length ? game.contracts : CONTRACTS.slice(0, 5);
 
   return (
-    <section className="rewardScreen">
+    <section className="rewardScreen screen">
       <header className="rewardTop">
         <div className="stageStack">
           <div><span>STAGE</span><strong>{game.stageIndex + 1}<em>/9</em></strong></div>
@@ -668,7 +669,7 @@ function InterimReportScreen({ game, onNext }) {
   const title = isBossCollection ? (stage.type === "中ボス" ? "中間徴収" : "利息徴収") : "中間精算予測";
 
   return (
-    <section className="interimScreen">
+    <section className="interimScreen screen">
       <header className="interimHero">
         <span>戦闘結果</span>
         <h2>{stage.name} 撃破</h2>
@@ -716,7 +717,7 @@ function FinalContractScreen({ game, onChoose }) {
   const predicted = draft.totalProfit + game.finalProfitBonus - draft.totalDebt - draft.totalInterest;
 
   return (
-    <section className="finalContractScreen">
+    <section className="finalContractScreen screen">
       <header className="interimHero">
         <span>FINAL CONTRACT</span>
         <h2>最後の悪あがき</h2>
@@ -758,7 +759,7 @@ function SettlementScreen({ settlement, onResult }) {
   ];
 
   return (
-    <section className={`settlementScreen ${isClear ? "isClear" : "isBankrupt"}`}>
+    <section className={`settlementScreen screen ${isClear ? "isClear" : "isBankrupt"}`}>
       <div className="settlementDecor decorPaperLeft">魔力契約書<br />利息は全てあなたのものに</div>
       <div className="settlementDecor decorPaperRight">請求明細書<br />元本 / 利息 / 契約精算</div>
 
@@ -828,7 +829,7 @@ function ResultScreen({ game, onRetry, onTitle }) {
   const displayedContracts = game.contracts.length ? game.contracts : CONTRACTS.slice(0, 6);
 
   return (
-    <section className={`resultScreen ${isClear ? "isClear" : "isBankrupt"}`}>
+    <section className={`resultScreen screen ${isClear ? "isClear" : "isBankrupt"}`}>
       <header className="resultHero">
         <div className="resultFigure" />
         <div className="resultTitle">
@@ -1184,7 +1185,7 @@ export default function App() {
   const showChainCompare = game.path.length > 0;
 
   return (
-    <main className={`app debt-${debtState.id}`}>
+    <main className={`app app-shell debt-${debtState.id}`}>
       <section className="phone">
         {game.screen === "home" && <TitleScreen onStart={() => setGame((current) => ({ ...current, screen: "character" }))} />}
         {game.screen === "character" && (
@@ -1197,7 +1198,7 @@ export default function App() {
         {game.screen === "map" && <MapScreen game={game} onNext={() => setGame((current) => ({ ...current, screen: "battle" }))} />}
 
         {game.screen === "battle" && (
-          <section className="battleScreen">
+          <section className="battleScreen screen">
             <header className="battleHeader">
               <div className="playerPanel">
                 <span>PLAYER HP</span>
