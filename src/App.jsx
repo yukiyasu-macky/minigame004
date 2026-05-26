@@ -1014,6 +1014,7 @@ export default function App() {
   const [battleFx, setBattleFx] = useState({ phase: BATTLE_PHASE.idle, tick: 0 });
   const boardRef = useRef(null);
   const fxTimers = useRef([]);
+  const battleGestureRef = useRef({ dragging: false, screen: "home" });
   const stage = STAGES[game.stageIndex];
   const selectedKeys = new Set(game.path.map(keyOf));
   const preview = calculateTurn(game, game.path.length);
@@ -1030,6 +1031,50 @@ export default function App() {
   useEffect(() => () => {
     fxTimers.current.forEach((timer) => window.clearTimeout(timer));
   }, []);
+
+  useEffect(() => {
+    battleGestureRef.current = { dragging: game.dragging, screen: game.screen };
+  }, [game.dragging, game.screen]);
+
+  useEffect(() => {
+    const battleActive = game.screen === "battle";
+    document.body.classList.toggle("battle-gesture-lock", battleActive);
+    document.documentElement.classList.toggle("battle-gesture-lock", battleActive);
+    return () => {
+      document.body.classList.remove("battle-gesture-lock");
+      document.documentElement.classList.remove("battle-gesture-lock");
+    };
+  }, [game.screen]);
+
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board) return undefined;
+    const preventBoardGesture = (event) => {
+      if (battleGestureRef.current.screen !== "battle") return;
+      event.preventDefault();
+    };
+    const preventDraggingGesture = (event) => {
+      if (battleGestureRef.current.screen !== "battle" || !battleGestureRef.current.dragging) return;
+      event.preventDefault();
+    };
+    const options = { passive: false };
+
+    board.addEventListener("pointermove", preventBoardGesture, options);
+    board.addEventListener("touchmove", preventBoardGesture, options);
+    board.addEventListener("gesturestart", preventBoardGesture, options);
+    board.addEventListener("wheel", preventBoardGesture, options);
+    document.addEventListener("pointermove", preventDraggingGesture, options);
+    document.addEventListener("touchmove", preventDraggingGesture, options);
+
+    return () => {
+      board.removeEventListener("pointermove", preventBoardGesture, options);
+      board.removeEventListener("touchmove", preventBoardGesture, options);
+      board.removeEventListener("gesturestart", preventBoardGesture, options);
+      board.removeEventListener("wheel", preventBoardGesture, options);
+      document.removeEventListener("pointermove", preventDraggingGesture, options);
+      document.removeEventListener("touchmove", preventDraggingGesture, options);
+    };
+  }, [game.screen]);
 
   const playBattleFx = (phase, delay = 0) => {
     const run = () => setBattleFx({ phase, tick: Date.now() });
@@ -1051,6 +1096,21 @@ export default function App() {
       playBattleFx(BATTLE_PHASE.idle, 780);
     }
     finishChain();
+  };
+
+  const cancelChain = () => {
+    fxTimers.current.forEach((timer) => window.clearTimeout(timer));
+    fxTimers.current = [];
+    setBattleFx({ phase: BATTLE_PHASE.idle, tick: Date.now() });
+    setGame((current) => {
+      if (current.screen !== "battle") return current;
+      return {
+        ...current,
+        path: [],
+        dragging: false,
+        message: "入力が中断された。もう一度なぞって欲張ろう。",
+      };
+    });
   };
 
   const moveToCell = (clientX, clientY) => {
@@ -1353,7 +1413,27 @@ export default function App() {
             </section>
 
             <section className="puzzleZone">
-              <section className="board" ref={boardRef} onPointerMove={(event) => game.dragging && addCell(moveToCell(event.clientX, event.clientY))} onPointerUp={handleFinishChain} onPointerCancel={handleFinishChain}>
+              <section
+                className="board"
+                ref={boardRef}
+                onContextMenu={(event) => event.preventDefault()}
+                onPointerMove={(event) => {
+                  if (!game.dragging) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  addCell(moveToCell(event.clientX, event.clientY));
+                }}
+                onPointerUp={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  handleFinishChain();
+                }}
+                onPointerCancel={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  cancelChain();
+                }}
+              >
                 <ChainLineOverlay path={game.path} color={chainLineColor} overdrive={debtState.id === "black"} />
                 {showChainCompare && (
                   <div className="chainComparePopover" aria-live="polite">
@@ -1383,6 +1463,7 @@ export default function App() {
                         key={key}
                         onPointerDown={(event) => {
                           event.preventDefault();
+                          event.stopPropagation();
                           event.currentTarget.setPointerCapture?.(event.pointerId);
                           setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
                           addCell({ row: rowIndex, col: colIndex });
