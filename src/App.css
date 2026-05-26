@@ -46,6 +46,16 @@ button {
     linear-gradient(180deg, #081127, var(--bg-navy));
 }
 
+.app-shell {
+  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+.screen {
+  min-width: 0;
+  min-height: 0;
+}
+
 .phone {
   position: relative;
   flex-shrink: 0;
@@ -1231,6 +1241,7 @@ button {
 }
 
 .mapNodeSheet {
+  position: relative;
   flex-shrink: 0;
   min-height: 72px;
   display: grid;
@@ -1243,6 +1254,25 @@ button {
   background: rgba(3, 16, 40, 0.9);
   box-shadow: 0 -10px 30px rgba(2, 8, 20, 0.36), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
   transform: translateY(0);
+}
+
+.sheetClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(126, 230, 255, 0.34);
+  border-radius: 50%;
+  color: var(--white);
+  font-size: 18px;
+  font-weight: 1000;
+  line-height: 1;
+  background: rgba(3, 16, 40, 0.78);
+  box-shadow: 0 0 14px rgba(77, 166, 255, 0.24);
 }
 
 .sheetIcon {
@@ -3740,5 +3770,744 @@ button {
 
   .resultTitle h2 {
     font-size: 52px;
+  }
+}
+
+@media (max-width: 600px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  .app,
+  .app-shell {
+    width: 100vw;
+    height: 100svh;
+    height: 100dvh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .phone {
+    width: min(100vw, 430px);
+    height: 100svh;
+    height: 100dvh;
+    min-height: 0;
+    max-height: 100dvh;
+    aspect-ratio: auto;
+    overflow: hidden;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .homeScreen,
+  .characterScreen,
+  .rewardScreen,
+  .interimScreen,
+  .finalContractScreen,
+  .settlementScreen,
+  .resultScreen {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .homeScreen {
+    grid-template-rows: auto minmax(170px, 1fr) auto auto auto auto;
+    gap: 6px;
+  }
+
+  .comicLogo {
+    min-height: 92px;
+    padding: 8px;
+  }
+
+  .comicLogo strong {
+    font-size: clamp(24px, 8vw, 34px);
+  }
+
+  .comicLogo em {
+    max-width: 78%;
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  .heroVisual {
+    min-height: 170px;
+    max-height: 34dvh;
+  }
+
+  .contractCard {
+    transform: scale(0.82);
+  }
+
+  .catchCopy {
+    margin: 0 auto;
+    padding: 7px 12px;
+    font-size: clamp(17px, 5.6vw, 24px);
+  }
+
+  .startButton,
+  .decideButton,
+  .interimActions button,
+  .settlementActions button,
+  .resultActions button {
+    min-height: 52px;
+  }
+
+  .rulePanel {
+    padding: 8px;
+  }
+
+  .rulePanel strong {
+    margin-bottom: 7px;
+    font-size: 21px;
+  }
+
+  .ruleCards {
+    gap: 6px;
+  }
+
+  .ruleCards div {
+    min-height: 58px;
+    padding: 7px 5px;
+  }
+
+  .ruleCards span {
+    font-size: 17px;
+  }
+
+  .ruleCards b,
+  .rulePanel p {
+    font-size: 10px;
+  }
+
+  .titleFooter {
+    gap: 8px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .titleFooter button {
+    min-height: 38px;
+    font-size: 15px;
+  }
+
+  .characterScreen {
+    grid-template-rows: auto minmax(190px, 33dvh) auto auto auto;
+    gap: 7px;
+  }
+
+  .selectHeader {
+    min-height: 54px;
+  }
+
+  .selectHeader h1 {
+    font-size: clamp(27px, 10vw, 40px);
+  }
+
+  .selectHeader p {
+    font-size: 13px;
+  }
+
+  .characterGrid {
+    gap: 7px;
+  }
+
+  .characterCard {
+    min-height: 0;
+    padding: 6px 4px;
+  }
+
+  .characterDetail {
+    min-height: 0;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .detailIdentity {
+    gap: 5px;
+  }
+
+  .detailIdentity strong {
+    font-size: 30px;
+  }
+
+  .detailText > p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .detailColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .detailBox {
+    padding: 8px;
+  }
+
+  .initialContracts {
+    gap: 6px;
+  }
+
+  .initialContracts span {
+    min-height: 48px;
+  }
+
+  .selectFooter {
+    gap: 8px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .mapScreen {
+    height: 100%;
+    grid-template-rows: 86px minmax(0, 1fr) minmax(62px, auto);
+    gap: 7px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .mapHeader {
+    min-height: 0;
+    gap: 5px;
+  }
+
+  .mapStateCard {
+    padding: 6px;
+    border-radius: 9px;
+  }
+
+  .mapStateCard span,
+  .mapStateCard small,
+  .mapStateCard em {
+    font-size: 8px;
+  }
+
+  .mapStateCard strong {
+    font-size: 18px;
+  }
+
+  .mapStateCard.final strong {
+    font-size: clamp(24px, 8.3vw, 32px);
+  }
+
+  .mapStateCard.overdrive strong {
+    font-size: clamp(24px, 8vw, 30px);
+  }
+
+  .mapRail {
+    min-height: 0;
+    margin: 0 18px;
+    padding: 4px 0 8px;
+  }
+
+  .mapRail::before {
+    top: 28px;
+    bottom: 32px;
+    width: 4px;
+  }
+
+  .mapNode {
+    grid-template-columns: 1fr 54px 1fr;
+    gap: 8px;
+    transform: scale(0.84);
+  }
+
+  .mapNode:nth-child(even) {
+    grid-template-columns: 1fr 54px 1fr;
+  }
+
+  .nodeSigil {
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
+  }
+
+  .mapNode.current {
+    transform: scale(1.02);
+  }
+
+  .mapNode.boss .nodeSigil,
+  .mapNode.boss.current .nodeSigil {
+    width: 54px;
+    height: 54px;
+  }
+
+  .mapNode strong {
+    font-size: 13px;
+  }
+
+  .mapNode small {
+    font-size: 8px;
+  }
+
+  .mapTemptation {
+    left: 12px;
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    padding: 7px 10px;
+  }
+
+  .mapNodeSheet {
+    max-height: 35dvh;
+    min-height: 62px;
+    grid-template-columns: 42px 1fr 104px;
+    gap: 7px;
+    overflow-y: auto;
+    padding: 8px 8px max(24px, env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+
+  .sheetClose {
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .sheetIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .sheetMain {
+    gap: 2px;
+  }
+
+  .sheetMain strong {
+    font-size: 15px;
+  }
+
+  .sheetMain p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .sheetTags {
+    gap: 4px;
+  }
+
+  .sheetTags b {
+    padding: 2px 5px;
+    font-size: 8px;
+  }
+
+  .prepareButton {
+    min-height: 48px;
+    font-size: 20px;
+  }
+
+  .prepareButton span {
+    font-size: 8px;
+  }
+
+  .battleScreen {
+    height: 100%;
+    grid-template-rows: 66px 44px minmax(0, 1fr) 48px;
+    gap: 6px;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .battleHeader {
+    gap: 6px;
+  }
+
+  .enemyPanel,
+  .playerPanel {
+    padding: 6px;
+  }
+
+  .enemyPanel h1 {
+    margin-bottom: 5px;
+    font-size: 15px;
+  }
+
+  .enemyPanel h1 span {
+    min-width: 20px;
+    min-height: 20px;
+    font-size: 8px;
+  }
+
+  .enemyPanel > strong {
+    font-size: 12px;
+  }
+
+  .playerPanel strong {
+    font-size: 19px;
+  }
+
+  .enemyBar,
+  .hpBar {
+    height: 9px;
+  }
+
+  .battleDebtRow {
+    min-height: 0;
+  }
+
+  .wideGauge {
+    padding: 6px 8px;
+  }
+
+  .wideGauge strong {
+    font-size: 11px;
+  }
+
+  .segmentedGauge {
+    height: 15px;
+  }
+
+  .puzzleZone {
+    min-height: 0;
+    align-content: center;
+  }
+
+  .board {
+    width: min(100%, 340px);
+    max-width: calc(100dvh - 188px);
+    gap: 3px;
+    padding: 5px;
+  }
+
+  .chainComparePopover {
+    top: 6px;
+    width: min(78%, 240px);
+    max-height: 26%;
+    padding: 6px 8px;
+  }
+
+  .chainComparePopover > strong,
+  .chainComparePopover span,
+  .chainComparePopover b {
+    font-size: 9px;
+  }
+
+  .battleFooter {
+    min-height: 0;
+  }
+
+  .contractShelf {
+    min-height: 0;
+    padding: 5px 7px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .contractShelf div {
+    gap: 7px;
+    justify-content: center;
+  }
+
+  .contractShelf i {
+    width: 34px;
+    height: 34px;
+  }
+
+  .rewardScreen {
+    width: 100%;
+    height: 100%;
+    grid-template-rows: auto auto auto auto auto auto auto;
+    gap: 7px;
+    transform: none;
+  }
+
+  .rewardTop {
+    grid-template-columns: 44px 1fr 82px;
+    gap: 5px;
+  }
+
+  .rewardTitle h2 {
+    font-size: clamp(28px, 9vw, 42px);
+  }
+
+  .rewardTitle p {
+    font-size: 12px;
+  }
+
+  .rewardCards {
+    min-height: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .rewardCard {
+    min-height: 230px;
+    padding: 8px 6px;
+  }
+
+  .rewardCard h3 {
+    font-size: 15px;
+  }
+
+  .rewardCard p {
+    min-height: 44px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .rewardCard small,
+  .rewardBuild,
+  .rewardTotals,
+  .rewardDebt {
+    display: none;
+  }
+
+  .rewardCard dl {
+    gap: 4px;
+  }
+
+  .rewardCard dl div {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+
+  .rewardCard dt,
+  .rewardCard dd {
+    font-size: 9px;
+  }
+
+  .rewardQuestion {
+    gap: 8px;
+  }
+
+  .rewardQuestion button {
+    min-height: 44px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+
+  .interimScreen {
+    grid-template-rows: auto auto auto auto auto;
+  }
+
+  .interimHero {
+    min-height: 110px;
+  }
+
+  .interimHero h2 {
+    font-size: clamp(30px, 10vw, 42px);
+  }
+
+  .interimLedger {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .interimLedger h3 {
+    font-size: 28px;
+  }
+
+  .interimLedger div {
+    min-height: 54px;
+  }
+
+  .interimDebt {
+    min-height: 0;
+  }
+
+  .finalContractScreen {
+    grid-template-rows: auto auto auto auto;
+    gap: 9px;
+  }
+
+  .finalContractGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .finalContractGrid button {
+    min-height: 78px;
+    grid-template-columns: 42px 1fr;
+    text-align: left;
+  }
+
+  .settlementScreen {
+    width: 100%;
+    height: 100%;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 8px;
+    transform: none;
+  }
+
+  .settlementHero {
+    min-height: 116px;
+  }
+
+  .settlementHero h2 {
+    font-size: clamp(42px, 14vw, 64px);
+  }
+
+  .settlementLedger {
+    padding: 10px;
+  }
+
+  .ledgerRow {
+    min-height: 58px;
+    grid-template-columns: 42px 1fr auto;
+    gap: 8px;
+  }
+
+  .ledgerRow span {
+    display: none;
+  }
+
+  .finalProfitBox {
+    min-height: 110px;
+    padding: 12px;
+  }
+
+  .finalProfitBox b {
+    font-size: clamp(34px, 12vw, 58px);
+  }
+
+  .judgementCards {
+    gap: 8px;
+  }
+
+  .judgementCard {
+    min-height: 96px;
+  }
+
+  .settlementTagline {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .resultScreen {
+    width: 100%;
+    height: 100%;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 8px;
+    transform: none;
+  }
+
+  .resultHero {
+    min-height: 170px;
+    grid-template-columns: 0.8fr 1fr;
+    padding: 10px;
+  }
+
+  .resultTitle h2 {
+    font-size: clamp(44px, 15vw, 68px);
+  }
+
+  .recordCards {
+    gap: 7px;
+  }
+
+  .recordCards div {
+    min-height: 88px;
+    padding: 8px;
+  }
+
+  .resultContracts,
+  .routePanel,
+  .rewardBox,
+  .resultTagline {
+    display: none;
+  }
+
+  .resultBottom {
+    grid-template-columns: 1fr;
+  }
+
+  .resultActions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .resultActions button:first-child {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) and (max-height: 700px) {
+  .phone {
+    padding-inline: 6px;
+  }
+
+  .homeScreen {
+    grid-template-rows: auto minmax(150px, 1fr) auto auto auto auto;
+  }
+
+  .heroVisual {
+    max-height: 30dvh;
+  }
+
+  .characterScreen {
+    grid-template-rows: auto 178px auto auto auto;
+  }
+
+  .characterDetail {
+    grid-template-columns: 1fr;
+  }
+
+  .detailIdentity {
+    grid-template-columns: 58px 1fr;
+    text-align: left;
+  }
+
+  .detailText > p,
+  .detailColumns,
+  .initialContracts {
+    display: none;
+  }
+
+  .mapScreen {
+    grid-template-rows: 78px minmax(0, 1fr) minmax(58px, auto);
+  }
+
+  .mapNode {
+    grid-template-columns: 1fr 48px 1fr;
+  }
+
+  .mapNode:nth-child(even) {
+    grid-template-columns: 1fr 48px 1fr;
+  }
+
+  .nodeSigil {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .mapNode.boss .nodeSigil,
+  .mapNode.boss.current .nodeSigil {
+    width: 48px;
+    height: 48px;
+  }
+
+  .battleScreen {
+    grid-template-rows: 60px 40px minmax(0, 1fr) 42px;
+    gap: 5px;
+  }
+
+  .board {
+    width: min(100%, 324px);
+  }
+
+  .rewardCard {
+    min-height: 200px;
   }
 }
