@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
+import { BATTLE_PHASE, SPRITES } from "./spriteRegistry";
 
 const BOARD_SIZE = 6;
 const BALANCE = {
@@ -66,6 +67,21 @@ const CONTRACTS = [
   { id: "lifeFinance", name: "延命融資", icon: "延", text: "戦闘勝利時HP+15 / 借金+100" },
 ];
 
+const CONTRACT_TONES = {
+  loanShark: "#FFD24A",
+  runawayMana: "#9B6BFF",
+  pleasureAddiction: "#FF78D8",
+  debtDodger: "#7EE6FF",
+  overInvest: "#35D889",
+  prepayRuin: "#FF8A3D",
+  desireRush: "#FF5C5C",
+  blackMarket: "#9B6BFF",
+  lifeCut: "#4DA6FF",
+  interestRefund: "#35D889",
+  lazyDeal: "#FFD24A",
+  lifeFinance: "#7EE6FF",
+};
+
 const FINAL_CONTRACTS = [
   { id: "soulCollateral", name: "魂担保", icon: "魂", text: "最終利益×2。ただし赤字なら破産演出強化。" },
   { id: "defaultGamble", name: "踏み倒し賭博", icon: "賭", text: "50%で借金0。50%で借金2倍。" },
@@ -78,6 +94,79 @@ const keyOf = ({ row, col }) => `${row}-${col}`;
 const isNeighbor = (a, b) => Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col)) === 1;
 const formatMoney = (value) => Math.round(value).toLocaleString("ja-JP");
 const countContract = (contracts, id) => contracts.filter((contract) => contract.id === id).length;
+
+function PixelSprite({ id, className = "", label }) {
+  const sprite = SPRITES[id];
+  return (
+    <span
+      aria-label={label || sprite?.id || id}
+      className={`pixelSprite ${className}`}
+      data-sprite={id}
+      role="img"
+      style={{
+        "--frame-count": sprite?.frameCount || 4,
+        "--sprite-fps": `${sprite?.fps || 6}s`,
+      }}
+    />
+  );
+}
+
+function ChainLineOverlay({ path, color = "#7EE6FF", overdrive = false }) {
+  if (path.length < 2) return null;
+  const points = path.map((cell) => `${((cell.col + 0.5) / BOARD_SIZE) * 100},${((cell.row + 0.5) / BOARD_SIZE) * 100}`).join(" ");
+  return (
+    <svg className={`chainLineOverlay ${overdrive ? "overdrive" : ""}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <polyline points={points} style={{ "--chain-color": color }} />
+      {path.map((cell, index) => (
+        <circle
+          cx={((cell.col + 0.5) / BOARD_SIZE) * 100}
+          cy={((cell.row + 0.5) / BOARD_SIZE) * 100}
+          key={`${cell.row}-${cell.col}-${index}`}
+          r={index === path.length - 1 ? 2.4 : 1.8}
+          style={{ "--chain-color": color }}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function BattleActors({ phase, debtState, fxTick }) {
+  const overdrive = debtState.id === "black";
+  const rentSprite = phase === BATTLE_PHASE.selecting
+    ? "rent_chain_select"
+    : phase === BATTLE_PHASE.release
+      ? "rent_cast"
+      : overdrive
+        ? "rent_overdrive"
+        : "rent_idle";
+  const lunonSprite = phase === BATTLE_PHASE.selecting || overdrive ? "lunon_chain_hype" : "lunon_idle_fly";
+  const enemySprite = phase === BATTLE_PHASE.result ? "paladin_hit" : "paladin_idle";
+
+  return (
+    <div className={`battleActors phase-${phase} ${overdrive ? "overdrive" : ""}`} aria-hidden="true" key={`actors-${fxTick}`}>
+      <div className="actorSide playerActor">
+        <PixelSprite id={rentSprite} className="rentSprite" label="レント" />
+        <PixelSprite id={lunonSprite} className="lunonSprite" label="ルノン" />
+        <span className="castSpark" />
+      </div>
+      <div className="actorSide enemyActor">
+        <PixelSprite id={enemySprite} className="paladinSprite" label="敵" />
+        <span className="hitSpark" />
+      </div>
+    </div>
+  );
+}
+
+function BattleResultBursts({ lastTurn, phase }) {
+  if (!lastTurn || phase !== BATTLE_PHASE.result) return null;
+  return (
+    <div className="resultBursts" aria-hidden="true">
+      <span className="profitBurst">+{formatMoney(lastTurn.profit)}</span>
+      <span className="debtBurst">+{formatMoney(lastTurn.debtGain)}</span>
+      <span className="damageBurst">{formatMoney(lastTurn.damage)}</span>
+    </div>
+  );
+}
 
 const makeBoard = () => {
   const board = Array.from({ length: BOARD_SIZE }, () =>
@@ -922,7 +1011,9 @@ function ResultScreen({ game, onRetry, onTitle }) {
 
 export default function App() {
   const [game, setGame] = useState(() => initialGame());
+  const [battleFx, setBattleFx] = useState({ phase: BATTLE_PHASE.idle, tick: 0 });
   const boardRef = useRef(null);
+  const fxTimers = useRef([]);
   const stage = STAGES[game.stageIndex];
   const selectedKeys = new Set(game.path.map(keyOf));
   const preview = calculateTurn(game, game.path.length);
@@ -935,6 +1026,32 @@ export default function App() {
 
   const reset = () => setGame(initialGame());
   const retry = () => setGame({ ...initialGame(), screen: "character" });
+
+  useEffect(() => () => {
+    fxTimers.current.forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
+  const playBattleFx = (phase, delay = 0) => {
+    const run = () => setBattleFx({ phase, tick: Date.now() });
+    if (delay === 0) {
+      run();
+      return;
+    }
+    const timer = window.setTimeout(run, delay);
+    fxTimers.current.push(timer);
+  };
+
+  const handleFinishChain = () => {
+    const isValidRelease = game.screen === "battle" && game.path.length >= 3;
+    if (isValidRelease) {
+      fxTimers.current.forEach((timer) => window.clearTimeout(timer));
+      fxTimers.current = [];
+      playBattleFx(BATTLE_PHASE.release);
+      playBattleFx(BATTLE_PHASE.result, 180);
+      playBattleFx(BATTLE_PHASE.idle, 780);
+    }
+    finishChain();
+  };
 
   const moveToCell = (clientX, clientY) => {
     const board = boardRef.current;
@@ -1183,6 +1300,14 @@ export default function App() {
   const compareThreshold = nextChainBonusThreshold(game.path.length);
   const compareNeed = compareThreshold ? compareThreshold - game.path.length : 0;
   const showChainCompare = game.path.length > 0;
+  const battlePhase = showChainCompare
+    ? BATTLE_PHASE.selecting
+    : battleFx.phase !== BATTLE_PHASE.idle
+      ? battleFx.phase
+      : debtState.id === "black"
+        ? BATTLE_PHASE.overdrive
+        : BATTLE_PHASE.idle;
+  const chainLineColor = chainPiece?.color || "#7EE6FF";
 
   return (
     <main className={`app app-shell debt-${debtState.id}`}>
@@ -1198,7 +1323,9 @@ export default function App() {
         {game.screen === "map" && <MapScreen game={game} onNext={() => setGame((current) => ({ ...current, screen: "battle" }))} />}
 
         {game.screen === "battle" && (
-          <section className="battleScreen screen">
+          <section className={`battleScreen screen phase-${battlePhase} ${debtState.id === "black" ? "overdrive-active" : ""}`}>
+            <BattleActors phase={battlePhase} debtState={debtState} fxTick={battleFx.tick} />
+            <BattleResultBursts lastTurn={game.lastTurn} phase={battlePhase} />
             <header className="battleHeader">
               <div className="playerPanel">
                 <span>PLAYER HP</span>
@@ -1212,7 +1339,7 @@ export default function App() {
               </div>
             </header>
 
-            <section className="battleDebtRow">
+            <section className={`battleDebtRow debt-state-${debtState.id}`}>
               <div className="wideGauge">
                 <strong>借金ゲージ</strong>
                 <div className="segmentedGauge">
@@ -1226,7 +1353,8 @@ export default function App() {
             </section>
 
             <section className="puzzleZone">
-              <section className="board" ref={boardRef} onPointerMove={(event) => game.dragging && addCell(moveToCell(event.clientX, event.clientY))} onPointerUp={finishChain} onPointerCancel={finishChain}>
+              <section className="board" ref={boardRef} onPointerMove={(event) => game.dragging && addCell(moveToCell(event.clientX, event.clientY))} onPointerUp={handleFinishChain} onPointerCancel={handleFinishChain}>
+                <ChainLineOverlay path={game.path} color={chainLineColor} overdrive={debtState.id === "black"} />
                 {showChainCompare && (
                   <div className="chainComparePopover" aria-live="polite">
                     <strong>{compareThreshold ? `あと${compareNeed}マスで${compareThreshold}CHAIN BONUS` : "欲望暴走中"}</strong>
@@ -1256,6 +1384,7 @@ export default function App() {
                         onPointerDown={(event) => {
                           event.preventDefault();
                           event.currentTarget.setPointerCapture?.(event.pointerId);
+                          setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
                           addCell({ row: rowIndex, col: colIndex });
                         }}
                         style={{ "--piece-color": meta.color }}
@@ -1274,7 +1403,7 @@ export default function App() {
               <div className="contractShelf">
                 <div>
                   {(game.contracts.length ? game.contracts : CONTRACTS.slice(0, 6)).slice(0, 6).map((contract, index) => (
-                    <i key={`${contract.id}-${index}`} aria-label={contract.name}><b>{contract.icon}</b></i>
+                    <i key={`${contract.id}-${index}`} aria-label={contract.name} style={{ "--contract-tone": CONTRACT_TONES[contract.id] || "#9B6BFF" }}><b>{contract.icon}</b></i>
                   ))}
                 </div>
               </div>

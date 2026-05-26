@@ -1365,6 +1365,78 @@ button {
   50% { transform: scale(1.08); filter: brightness(1.25); }
 }
 
+@keyframes spriteIdle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.01); }
+}
+
+@keyframes spriteHype {
+  0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
+  50% { transform: translateY(-3px) rotate(1deg) scale(1.05); }
+}
+
+@keyframes spriteCast {
+  0% { transform: translateX(0) scale(1); }
+  35% { transform: translateX(4px) scale(1.06); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes spriteHit {
+  0% { transform: translateX(0) scale(1); filter: brightness(1); }
+  35% { transform: translateX(6px) scale(0.96); filter: brightness(1.6); }
+  100% { transform: translateX(0) scale(1); filter: brightness(1); }
+}
+
+@keyframes lunonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes sparklePop {
+  0% { opacity: 0; transform: scale(0.4); }
+  35% { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+@keyframes popupRise {
+  0% { opacity: 0; transform: translateY(8px) scale(0.92); }
+  24% { opacity: 1; transform: translateY(0) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-18px) scale(1); }
+}
+
+@keyframes chainPulse {
+  from { opacity: 0.76; }
+  to { opacity: 1; }
+}
+
+@keyframes nodeGlow {
+  from { r: 1.7; opacity: 0.8; }
+  to { r: 2.4; opacity: 1; }
+}
+
+@keyframes overdrivePiecePulse {
+  from {
+    filter: brightness(1.1) saturate(1.15);
+    box-shadow:
+      inset 0 -7px 0 rgba(0, 0, 0, 0.24),
+      inset 0 0 0 2px rgba(244, 248, 255, 0.28),
+      0 0 14px rgba(126, 230, 255, 0.32);
+  }
+  to {
+    filter: brightness(1.35) saturate(1.3);
+    box-shadow:
+      inset 0 -7px 0 rgba(0, 0, 0, 0.24),
+      inset 0 0 0 2px rgba(244, 248, 255, 0.4),
+      0 0 20px rgba(155, 107, 255, 0.64),
+      0 0 28px rgba(126, 230, 255, 0.38);
+  }
+}
+
+@keyframes gaugeAwaken {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.22); }
+}
+
 .battleScreen {
   position: relative;
   height: 100%;
@@ -1372,6 +1444,15 @@ button {
   grid-template-rows: 76px 52px minmax(228px, 1fr) 54px;
   gap: 8px;
   overflow: hidden;
+}
+
+.battleScreen,
+.piece,
+.pixelSprite,
+.contractShelf b,
+.chainComparePopover,
+.resultBursts span {
+  image-rendering: pixelated;
 }
 
 .battleScreen::before {
@@ -1383,6 +1464,215 @@ button {
     radial-gradient(circle at 54% 26%, rgba(126, 230, 255, 0.18), transparent 26%),
     linear-gradient(124deg, transparent 0 44%, rgba(77, 166, 255, 0.1) 45% 46%, transparent 47%),
     radial-gradient(circle at 92% 58%, rgba(155, 107, 255, 0.16), transparent 24%);
+}
+
+.battleActors {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 70px;
+  z-index: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.actorSide {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  display: grid;
+  place-items: end center;
+  opacity: 0.86;
+  filter: drop-shadow(0 0 12px rgba(126, 230, 255, 0.28));
+}
+
+.enemyActor {
+  transform: scaleX(-1);
+  filter: drop-shadow(0 0 12px rgba(155, 107, 255, 0.24));
+}
+
+.pixelSprite {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: block;
+  flex-shrink: 0;
+  transform-origin: 50% 100%;
+  animation: spriteIdle 0.9s steps(4) infinite;
+}
+
+.pixelSprite::before,
+.pixelSprite::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.pixelSprite::before {
+  inset: 10px 18px 9px;
+  border: 3px solid #050812;
+  border-radius: 14px 14px 10px 10px;
+  background:
+    linear-gradient(90deg, transparent 0 25%, rgba(255, 210, 74, 0.94) 26% 34%, transparent 35%),
+    radial-gradient(circle at 36% 31%, #f4f8ff 0 2px, #4da6ff 3px 4px, transparent 5px),
+    radial-gradient(circle at 62% 31%, #f4f8ff 0 2px, #4da6ff 3px 4px, transparent 5px),
+    linear-gradient(180deg, #202846 0 28%, #121827 29% 58%, #050812 59%);
+  box-shadow:
+    -9px 8px 0 #0b1021,
+    9px 8px 0 #0b1021,
+    inset 0 -9px 0 rgba(77, 166, 255, 0.2);
+}
+
+.pixelSprite::after {
+  left: 10px;
+  right: 10px;
+  bottom: 4px;
+  height: 18px;
+  border: 3px solid #050812;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, #10182c 0 22%, #2f2354 23% 54%, #10182c 55%),
+    linear-gradient(180deg, #27304d, #0a1022);
+  box-shadow:
+    0 -18px 0 -9px #1d2541,
+    15px -9px 0 -6px #7b55ff,
+    -14px -7px 0 -6px #4da6ff;
+}
+
+.rentSprite::before {
+  background:
+    linear-gradient(90deg, transparent 0 25%, rgba(255, 210, 74, 0.94) 26% 34%, transparent 35%),
+    radial-gradient(circle at 36% 31%, #f4f8ff 0 2px, #4da6ff 3px 4px, transparent 5px),
+    radial-gradient(circle at 62% 31%, #f4f8ff 0 2px, #9b6bff 3px 4px, transparent 5px),
+    linear-gradient(180deg, #26304f 0 28%, #111827 29% 58%, #050812 59%);
+}
+
+.lunonSprite {
+  position: absolute;
+  right: -9px;
+  top: 2px;
+  width: 34px;
+  height: 34px;
+  animation: lunonFloat 0.8s steps(3) infinite;
+}
+
+.lunonSprite::before {
+  inset: 7px 9px;
+  border-width: 2px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 35%, #f4f8ff 0 3px, #7ee6ff 4px 7px, #165d9f 8px);
+  box-shadow:
+    -9px 2px 0 -4px rgba(126, 230, 255, 0.85),
+    9px 2px 0 -4px rgba(126, 230, 255, 0.85),
+    0 0 12px rgba(126, 230, 255, 0.9);
+}
+
+.lunonSprite::after {
+  display: none;
+}
+
+.paladinSprite::before {
+  background:
+    radial-gradient(circle at 36% 31%, #f4f8ff 0 2px, #ff5c5c 3px 4px, transparent 5px),
+    radial-gradient(circle at 62% 31%, #f4f8ff 0 2px, #ff8a3d 3px 4px, transparent 5px),
+    linear-gradient(180deg, #f6d778 0 24%, #4d5471 25% 58%, #192033 59%);
+}
+
+.paladinSprite::after {
+  background:
+    linear-gradient(90deg, #3a4160, #111827),
+    linear-gradient(180deg, #fff1b8, #d9a032);
+  box-shadow:
+    15px -12px 0 -7px #ffd24a,
+    -14px -7px 0 -6px #4d5471;
+}
+
+.phase-selecting .rentSprite,
+.phase-overdrive .rentSprite {
+  filter: drop-shadow(0 0 10px rgba(126, 230, 255, 0.82)) drop-shadow(0 0 16px rgba(155, 107, 255, 0.42));
+  animation: spriteHype 0.55s steps(4) infinite;
+}
+
+.phase-release .rentSprite {
+  animation: spriteCast 0.36s steps(6) 1;
+  filter: drop-shadow(0 0 16px rgba(126, 230, 255, 0.9));
+}
+
+.phase-result .paladinSprite {
+  animation: spriteHit 0.28s steps(3) 1;
+  filter: drop-shadow(0 0 18px rgba(255, 92, 92, 0.75));
+}
+
+.overdrive .rentSprite,
+.overdrive-active .battleActors {
+  filter: drop-shadow(0 0 16px rgba(155, 107, 255, 0.84)) drop-shadow(0 0 26px rgba(126, 230, 255, 0.32));
+}
+
+.castSpark,
+.hitSpark {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, #f4f8ff 0 16%, #7ee6ff 17% 42%, transparent 43%);
+  box-shadow: 0 0 18px rgba(126, 230, 255, 0.8);
+}
+
+.castSpark {
+  right: -8px;
+  top: 32px;
+}
+
+.hitSpark {
+  left: 4px;
+  top: 30px;
+  background: radial-gradient(circle, #fff7d1 0 16%, #ff5c5c 17% 42%, transparent 43%);
+}
+
+.phase-release .castSpark,
+.phase-result .hitSpark {
+  animation: sparklePop 0.32s ease-out 1;
+}
+
+.resultBursts {
+  position: absolute;
+  inset: 118px 8px auto;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.resultBursts span {
+  min-width: 56px;
+  border: 2px solid #050812;
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: #071022;
+  font-size: 13px;
+  font-weight: 1000;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgba(244, 248, 255, 0.5);
+  animation: popupRise 0.72s ease-out 1 both;
+}
+
+.profitBurst {
+  background: #7cff71;
+  box-shadow: 0 0 14px rgba(124, 255, 113, 0.6);
+}
+
+.debtBurst {
+  background: #ff70c8;
+  box-shadow: 0 0 14px rgba(255, 112, 200, 0.5);
+}
+
+.damageBurst {
+  background: #ffd24a;
+  box-shadow: 0 0 14px rgba(255, 210, 74, 0.58);
 }
 
 .battleHeader,
@@ -1560,6 +1850,41 @@ button {
   box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.06), 0 0 22px rgba(77, 166, 255, 0.24);
 }
 
+.chainLineOverlay {
+  position: absolute;
+  inset: 5px;
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px var(--chain-color)) drop-shadow(0 0 10px rgba(126, 230, 255, 0.72));
+}
+
+.chainLineOverlay polyline {
+  fill: none;
+  stroke: var(--chain-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+  vector-effect: non-scaling-stroke;
+  animation: chainPulse 0.55s ease-in-out infinite alternate;
+}
+
+.chainLineOverlay circle {
+  fill: #f4f8ff;
+  stroke: var(--chain-color);
+  stroke-width: 1.3;
+  vector-effect: non-scaling-stroke;
+  animation: nodeGlow 0.62s ease-in-out infinite alternate;
+}
+
+.chainLineOverlay.overdrive {
+  filter: drop-shadow(0 0 6px #9b6bff) drop-shadow(0 0 14px rgba(126, 230, 255, 0.86));
+}
+
+.chainLineOverlay.overdrive polyline {
+  stroke-width: 3.4;
+}
+
 .chainComparePopover {
   position: absolute;
   left: 50%;
@@ -1632,7 +1957,7 @@ button {
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: 12px;
   color: var(--white);
   touch-action: none;
   background:
@@ -1644,7 +1969,21 @@ button {
     0 5px 12px rgba(0, 0, 0, 0.34);
 }
 
+.piece::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 9px;
+  border: 1px solid rgba(244, 248, 255, 0.26);
+  background:
+    linear-gradient(135deg, rgba(244, 248, 255, 0.45), transparent 28%),
+    linear-gradient(315deg, rgba(0, 0, 0, 0.22), transparent 34%);
+  pointer-events: none;
+}
+
 .piece span {
+  position: relative;
+  z-index: 1;
   font-size: clamp(12px, 3.4vw, 16px);
   font-weight: 1000;
 }
@@ -1666,12 +2005,22 @@ button {
 }
 
 .piece.selected {
-  outline: 3px solid var(--white);
+  outline: 2px solid var(--white);
+  outline-offset: 1px;
   transform: scale(0.94);
   box-shadow:
-    0 0 0 4px rgba(126, 230, 255, 0.22),
-    0 0 22px rgba(126, 230, 255, 0.8),
+    0 0 0 4px color-mix(in srgb, var(--piece-color) 34%, transparent),
+    0 0 20px var(--piece-color),
+    0 0 28px rgba(126, 230, 255, 0.64),
     inset 0 0 0 2px rgba(244, 248, 255, 0.5);
+}
+
+.phase-selecting .piece:not(.curse) {
+  filter: saturate(1.08) brightness(1.05);
+}
+
+.overdrive-active .piece:not(.curse) {
+  animation: overdrivePiecePulse 1s ease-in-out infinite alternate;
 }
 
 .piece.curse {
@@ -1714,6 +2063,15 @@ button {
 
 .battleDebtRow {
   display: block;
+}
+
+.debt-state-black .wideGauge {
+  border-color: rgba(155, 107, 255, 0.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 248, 255, 0.08),
+    0 0 24px rgba(155, 107, 255, 0.45),
+    0 0 34px rgba(126, 230, 255, 0.22);
+  animation: gaugeAwaken 0.9s ease-in-out infinite alternate;
 }
 
 .wideGauge {
@@ -1759,12 +2117,16 @@ button {
   height: 34px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(126, 230, 255, 0.32);
-  border-radius: 10px;
+  border: 2px solid #050812;
+  border-radius: 7px;
   color: var(--white);
   font-size: 14px;
-  background: rgba(155, 107, 255, 0.32);
-  box-shadow: 0 0 14px rgba(155, 107, 255, 0.22);
+  background:
+    linear-gradient(135deg, rgba(244, 248, 255, 0.25), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--contract-tone, #9B6BFF) 82%, #000 18%), #080b16);
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 248, 255, 0.16),
+    0 0 12px color-mix(in srgb, var(--contract-tone, #9B6BFF) 62%, transparent);
 }
 
 .bottomHud {
