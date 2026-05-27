@@ -176,10 +176,10 @@
       "prompt": "Horizontal 5-frame sprite sheet, 64x64 per frame, paladin enemy defeat animation. Kneel and vanish into blue pixels, no gore, readable small sprite, transparent background."
     },
     {
-      "id": "pieces_normal_5color",
+      "id": "piece_normal_5color",
       "category": "piece",
-      "file": "assets/images/pieces/pieces_normal_64x64_5color.png",
-      "runtimeTarget": "public/assets/pieces/pieces_normal_64x64_5color.png",
+      "file": "assets/images/pieces/piece_normal_5color_64x64_5f.png",
+      "runtimeTarget": "public/assets/pieces/piece_normal_5color_64x64_5f.png",
       "frameWidth": 64,
       "frameHeight": 64,
       "frameCount": 5,

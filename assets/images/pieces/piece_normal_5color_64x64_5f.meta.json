@@ -1,0 +1,46 @@
+{
+  "input": "/Users/makihara/Downloads/ChatGPT Image 2026年5月27日 11_01_48.png",
+  "output": "assets/images/pieces/piece_normal_5color_64x64_5f.png",
+  "width": 320,
+  "height": 64,
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "frameCount": 5,
+  "components": [
+    {
+      "x0": 27,
+      "y0": 265,
+      "x1": 361,
+      "y1": 645,
+      "area": 122044
+    },
+    {
+      "x0": 379,
+      "y0": 265,
+      "x1": 706,
+      "y1": 644,
+      "area": 119314
+    },
+    {
+      "x0": 722,
+      "y0": 265,
+      "x1": 1049,
+      "y1": 645,
+      "area": 119132
+    },
+    {
+      "x0": 1069,
+      "y0": 265,
+      "x1": 1397,
+      "y1": 645,
+      "area": 119889
+    },
+    {
+      "x0": 1415,
+      "y0": 265,
+      "x1": 1745,
+      "y1": 644,
+      "area": 120616
+    }
+  ]
+}
