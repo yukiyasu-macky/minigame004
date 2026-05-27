@@ -3,6 +3,10 @@ import "./App.css";
 import { BATTLE_PHASE, SPRITES } from "./spriteRegistry";
 
 const BOARD_SIZE = 6;
+const AD_CONFIG = {
+  headerReserveHeight: 48,
+  bannerReserveHeight: 64,
+};
 const BALANCE = {
   playerMaxHp: 160,
   maxDebt: 5000,
@@ -165,6 +169,30 @@ function BattleResultBursts({ lastTurn, phase }) {
       <span className="debtBurst">+{formatMoney(lastTurn.debtGain)}</span>
       <span className="damageBurst">{formatMoney(lastTurn.damage)}</span>
     </div>
+  );
+}
+
+function AdChrome({ isAdShowing, onShowFullscreenAd, onCloseFullscreenAd }) {
+  return (
+    <>
+      <div className="adHeaderReserve" aria-label="上部ヘッダー予約領域">
+        <span>HEADER / AD SAFE</span>
+        <button type="button" onClick={onShowFullscreenAd} disabled={isAdShowing}>全画面広告テスト</button>
+      </div>
+      <div className="adBannerReserve" aria-label="下部バナー広告予約領域">
+        <span>MOCK BANNER AD</span>
+      </div>
+      {isAdShowing && (
+        <div className="mockFullscreenAd" role="dialog" aria-modal="true" aria-label="モック全画面広告">
+          <div>
+            <span>MOCK FULLSCREEN AD</span>
+            <strong>広告表示中</strong>
+            <p>ゲーム進行と入力を一時停止しています。</p>
+            <button type="button" onClick={onCloseFullscreenAd}>広告を閉じる</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1012,6 +1040,7 @@ function ResultScreen({ game, onRetry, onTitle }) {
 export default function App() {
   const [game, setGame] = useState(() => initialGame());
   const [battleFx, setBattleFx] = useState({ phase: BATTLE_PHASE.idle, tick: 0 });
+  const [isAdShowing, setIsAdShowing] = useState(false);
   const boardRef = useRef(null);
   const fxTimers = useRef([]);
   const battleGestureRef = useRef({ dragging: false, screen: "home" });
@@ -1025,8 +1054,14 @@ export default function App() {
     return game.contracts.map((contract) => contract.name).join(" / ");
   }, [game.contracts]);
 
-  const reset = () => setGame(initialGame());
-  const retry = () => setGame({ ...initialGame(), screen: "character" });
+  const reset = () => {
+    if (isAdShowing) return;
+    setGame(initialGame());
+  };
+  const retry = () => {
+    if (isAdShowing) return;
+    setGame({ ...initialGame(), screen: "character" });
+  };
 
   useEffect(() => () => {
     fxTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -1037,14 +1072,14 @@ export default function App() {
   }, [game.dragging, game.screen]);
 
   useEffect(() => {
-    const battleActive = game.screen === "battle";
+    const battleActive = game.screen === "battle" || isAdShowing;
     document.body.classList.toggle("battle-gesture-lock", battleActive);
     document.documentElement.classList.toggle("battle-gesture-lock", battleActive);
     return () => {
       document.body.classList.remove("battle-gesture-lock");
       document.documentElement.classList.remove("battle-gesture-lock");
     };
-  }, [game.screen]);
+  }, [game.screen, isAdShowing]);
 
   useEffect(() => {
     const board = boardRef.current;
@@ -1087,6 +1122,7 @@ export default function App() {
   };
 
   const handleFinishChain = () => {
+    if (isAdShowing) return;
     const isValidRelease = game.screen === "battle" && game.path.length >= 3;
     if (isValidRelease) {
       fxTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -1113,6 +1149,15 @@ export default function App() {
     });
   };
 
+  const showMockFullscreenAd = () => {
+    cancelChain();
+    setIsAdShowing(true);
+  };
+
+  const closeMockFullscreenAd = () => {
+    setIsAdShowing(false);
+  };
+
   const moveToCell = (clientX, clientY) => {
     const board = boardRef.current;
     if (!board) return null;
@@ -1123,7 +1168,7 @@ export default function App() {
   };
 
   const addCell = (cell) => {
-    if (!cell) return;
+    if (!cell || isAdShowing) return;
     setGame((current) => {
       if (current.screen !== "battle") return current;
       const piece = current.board[cell.row][cell.col];
@@ -1168,6 +1213,7 @@ export default function App() {
   };
 
   const finishChain = () => {
+    if (isAdShowing) return;
     setGame((current) => {
       if (current.screen !== "battle" || current.path.length < 3) {
         return { ...current, path: [], dragging: false, message: "3個以上で成立。もう少し欲張れる。" };
@@ -1315,6 +1361,7 @@ export default function App() {
   };
 
   const chooseReward = (contract) => {
+    if (isAdShowing) return;
     setGame((current) => {
       const nextStageIndex = current.stageIndex + 1;
       const addedDebt = contract?.id === "prepayRuin" ? 1000 : 0;
@@ -1334,6 +1381,7 @@ export default function App() {
   };
 
   const chooseFinalContract = (contract) => {
+    if (isAdShowing) return;
     setGame((current) => {
       const gambleWin = contract.id === "defaultGamble" ? Math.random() < 0.5 : false;
       const settlement = createFinalSettlement(current, current.finalDraft, contract, gambleWin);
@@ -1370,133 +1418,147 @@ export default function App() {
   const chainLineColor = chainPiece?.color || "#7EE6FF";
 
   return (
-    <main className={`app app-shell debt-${debtState.id}`}>
+    <main
+      className={`app app-shell debt-${debtState.id} ${isAdShowing ? "ad-showing" : ""}`}
+      style={{
+        "--header-reserve-height": `${AD_CONFIG.headerReserveHeight}px`,
+        "--reserved-ad-height": `${AD_CONFIG.bannerReserveHeight}px`,
+      }}
+    >
       <section className="phone">
-        {game.screen === "home" && <TitleScreen onStart={() => setGame((current) => ({ ...current, screen: "character" }))} />}
-        {game.screen === "character" && (
-          <CharacterSelect
-            selectedId={game.characterId}
-            onSelect={(characterId) => setGame((current) => ({ ...current, characterId }))}
-            onNext={() => setGame((current) => ({ ...current, screen: "map" }))}
-          />
-        )}
-        {game.screen === "map" && <MapScreen game={game} onNext={() => setGame((current) => ({ ...current, screen: "battle" }))} />}
+        <AdChrome
+          isAdShowing={isAdShowing}
+          onShowFullscreenAd={showMockFullscreenAd}
+          onCloseFullscreenAd={closeMockFullscreenAd}
+        />
+        <div className="gameContentArea" aria-hidden={isAdShowing ? "true" : undefined}>
+          {game.screen === "home" && <TitleScreen onStart={() => !isAdShowing && setGame((current) => ({ ...current, screen: "character" }))} />}
+          {game.screen === "character" && (
+            <CharacterSelect
+              selectedId={game.characterId}
+              onSelect={(characterId) => !isAdShowing && setGame((current) => ({ ...current, characterId }))}
+              onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "map" }))}
+            />
+          )}
+          {game.screen === "map" && <MapScreen game={game} onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "battle" }))} />}
 
-        {game.screen === "battle" && (
-          <section className={`battleScreen screen phase-${battlePhase} ${debtState.id === "black" ? "overdrive-active" : ""}`}>
-            <BattleActors phase={battlePhase} debtState={debtState} fxTick={battleFx.tick} />
-            <BattleResultBursts lastTurn={game.lastTurn} phase={battlePhase} />
-            <header className="battleHeader">
-              <div className="playerPanel">
-                <span>PLAYER HP</span>
-                <strong>{game.hp}<em>/ {PLAYER_MAX_HP}</em></strong>
-                <div className="hpBar"><i style={{ width: `${hpPercent}%` }} /></div>
-              </div>
-              <div className="enemyPanel">
-                <h1><span>ENEMY HP</span>{stage.name}</h1>
-                <div className="enemyBar"><i style={{ width: `${enemyHpPercent}%` }} /></div>
-                <strong>{formatMoney(game.enemyHp)} <em>/ {formatMoney(stage.hp)}</em></strong>
-              </div>
-            </header>
-
-            <section className={`battleDebtRow debt-state-${debtState.id}`}>
-              <div className="wideGauge">
-                <strong>借金ゲージ</strong>
-                <div className="segmentedGauge">
-                  <span className="segmentBlue" />
-                  <span className="segmentYellow" />
-                  <span className="segmentRed" />
-                  <span className="segmentBlack" />
-                  <em style={{ left: `${Math.min(100, (previewDebt / MAX_DEBT) * 100)}%` }} />
+          {game.screen === "battle" && (
+            <section className={`battleScreen screen phase-${battlePhase} ${debtState.id === "black" ? "overdrive-active" : ""}`}>
+              <BattleActors phase={battlePhase} debtState={debtState} fxTick={battleFx.tick} />
+              <BattleResultBursts lastTurn={game.lastTurn} phase={battlePhase} />
+              <header className="battleHeader">
+                <div className="playerPanel">
+                  <span>PLAYER HP</span>
+                  <strong>{game.hp}<em>/ {PLAYER_MAX_HP}</em></strong>
+                  <div className="hpBar"><i style={{ width: `${hpPercent}%` }} /></div>
                 </div>
-              </div>
-            </section>
+                <div className="enemyPanel">
+                  <h1><span>ENEMY HP</span>{stage.name}</h1>
+                  <div className="enemyBar"><i style={{ width: `${enemyHpPercent}%` }} /></div>
+                  <strong>{formatMoney(game.enemyHp)} <em>/ {formatMoney(stage.hp)}</em></strong>
+                </div>
+              </header>
 
-            <section className="puzzleZone">
-              <section
-                className="board"
-                ref={boardRef}
-                onContextMenu={(event) => event.preventDefault()}
-                onPointerMove={(event) => {
-                  if (!game.dragging) return;
-                  event.preventDefault();
-                  event.stopPropagation();
-                  addCell(moveToCell(event.clientX, event.clientY));
-                }}
-                onPointerUp={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  handleFinishChain();
-                }}
-                onPointerCancel={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  cancelChain();
-                }}
-              >
-                <ChainLineOverlay path={game.path} color={chainLineColor} overdrive={debtState.id === "black"} />
-                {showChainCompare && (
-                  <div className="chainComparePopover" aria-live="polite">
-                    <strong>{compareThreshold ? `あと${compareNeed}マスで${compareThreshold}CHAIN BONUS` : "欲望暴走中"}</strong>
-                    <div>
-                      <span>今離す</span>
-                      <b className="profitText">利益 +{formatMoney(preview.profit)}</b>
-                      <b className="debtText">借金 +{formatMoney(preview.debtGain)}</b>
-                    </div>
-                    <div>
-                      <span>伸ばすと</span>
-                      <b className="profitText">利益 +{formatMoney(stretchPreview.profit)}</b>
-                      <b className="debtText">借金 +{formatMoney(stretchPreview.debtGain)}</b>
-                    </div>
+              <section className={`battleDebtRow debt-state-${debtState.id}`}>
+                <div className="wideGauge">
+                  <strong>借金ゲージ</strong>
+                  <div className="segmentedGauge">
+                    <span className="segmentBlue" />
+                    <span className="segmentYellow" />
+                    <span className="segmentRed" />
+                    <span className="segmentBlack" />
+                    <em style={{ left: `${Math.min(100, (previewDebt / MAX_DEBT) * 100)}%` }} />
                   </div>
-                )}
-                {game.board.map((row, rowIndex) =>
-                  row.map((piece, colIndex) => {
-                    const meta = getPiece(piece);
-                    const key = `${rowIndex}-${colIndex}`;
-                    const order = game.path.findIndex((cell) => keyOf(cell) === key);
-                    return (
-                      <button
-                        className={`piece ${piece === "curse" ? "curse" : ""} ${selectedKeys.has(key) ? "selected" : ""}`}
-                        data-row={rowIndex}
-                        data-col={colIndex}
-                        key={key}
-                        onPointerDown={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          event.currentTarget.setPointerCapture?.(event.pointerId);
-                          setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
-                          addCell({ row: rowIndex, col: colIndex });
-                        }}
-                        style={{ "--piece-color": meta.color }}
-                        type="button"
-                      >
-                        <span>{meta.label}</span>
-                        {order >= 0 && <em>{order + 1}</em>}
-                      </button>
-                    );
-                  })
-                )}
-              </section>
-            </section>
-
-            <footer className="battleFooter">
-              <div className="contractShelf">
-                <div>
-                  {(game.contracts.length ? game.contracts : CONTRACTS.slice(0, 6)).slice(0, 6).map((contract, index) => (
-                    <i key={`${contract.id}-${index}`} aria-label={contract.name} style={{ "--contract-tone": CONTRACT_TONES[contract.id] || "#9B6BFF" }}><b>{contract.icon}</b></i>
-                  ))}
                 </div>
-              </div>
-            </footer>
-          </section>
-        )}
+              </section>
 
-        {game.screen === "interim" && <InterimReportScreen game={game} onNext={() => setGame((current) => ({ ...current, screen: "reward" }))} />}
-        {game.screen === "reward" && <RewardScreen game={game} onChoose={chooseReward} />}
-        {game.screen === "finalContract" && <FinalContractScreen game={game} onChoose={chooseFinalContract} />}
-        {game.screen === "settlement" && <SettlementScreen settlement={game.settlement} onResult={() => setGame((current) => ({ ...current, screen: "result" }))} />}
-        {game.screen === "result" && <ResultScreen game={game} onRetry={retry} onTitle={reset} />}
+              <section className="puzzleZone">
+                <section
+                  className="board"
+                  ref={boardRef}
+                  onContextMenu={(event) => event.preventDefault()}
+                  onPointerMove={(event) => {
+                    if (isAdShowing || !game.dragging) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    addCell(moveToCell(event.clientX, event.clientY));
+                  }}
+                  onPointerUp={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (!isAdShowing) handleFinishChain();
+                  }}
+                  onPointerCancel={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    cancelChain();
+                  }}
+                >
+                  <ChainLineOverlay path={game.path} color={chainLineColor} overdrive={debtState.id === "black"} />
+                  {showChainCompare && (
+                    <div className="chainComparePopover" aria-live="polite">
+                      <strong>{compareThreshold ? `あと${compareNeed}マスで${compareThreshold}CHAIN BONUS` : "欲望暴走中"}</strong>
+                      <div>
+                        <span>今離す</span>
+                        <b className="profitText">利益 +{formatMoney(preview.profit)}</b>
+                        <b className="debtText">借金 +{formatMoney(preview.debtGain)}</b>
+                      </div>
+                      <div>
+                        <span>伸ばすと</span>
+                        <b className="profitText">利益 +{formatMoney(stretchPreview.profit)}</b>
+                        <b className="debtText">借金 +{formatMoney(stretchPreview.debtGain)}</b>
+                      </div>
+                    </div>
+                  )}
+                  {game.board.map((row, rowIndex) =>
+                    row.map((piece, colIndex) => {
+                      const meta = getPiece(piece);
+                      const key = `${rowIndex}-${colIndex}`;
+                      const order = game.path.findIndex((cell) => keyOf(cell) === key);
+                      return (
+                        <button
+                          className={`piece ${piece === "curse" ? "curse" : ""} ${selectedKeys.has(key) ? "selected" : ""}`}
+                          data-row={rowIndex}
+                          data-col={colIndex}
+                          key={key}
+                          onPointerDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            if (isAdShowing) return;
+                            event.currentTarget.setPointerCapture?.(event.pointerId);
+                            setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
+                            addCell({ row: rowIndex, col: colIndex });
+                          }}
+                          style={{ "--piece-color": meta.color }}
+                          type="button"
+                        >
+                          <span>{meta.label}</span>
+                          {order >= 0 && <em>{order + 1}</em>}
+                        </button>
+                      );
+                    })
+                  )}
+                </section>
+              </section>
+
+              <footer className="battleFooter">
+                <div className="contractShelf">
+                  <div>
+                    {(game.contracts.length ? game.contracts : CONTRACTS.slice(0, 6)).slice(0, 6).map((contract, index) => (
+                      <i key={`${contract.id}-${index}`} aria-label={contract.name} style={{ "--contract-tone": CONTRACT_TONES[contract.id] || "#9B6BFF" }}><b>{contract.icon}</b></i>
+                    ))}
+                  </div>
+                </div>
+              </footer>
+            </section>
+          )}
+
+          {game.screen === "interim" && <InterimReportScreen game={game} onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "reward" }))} />}
+          {game.screen === "reward" && <RewardScreen game={game} onChoose={chooseReward} />}
+          {game.screen === "finalContract" && <FinalContractScreen game={game} onChoose={chooseFinalContract} />}
+          {game.screen === "settlement" && <SettlementScreen settlement={game.settlement} onResult={() => !isAdShowing && setGame((current) => ({ ...current, screen: "result" }))} />}
+          {game.screen === "result" && <ResultScreen game={game} onRetry={retry} onTitle={reset} />}
+        </div>
       </section>
     </main>
   );

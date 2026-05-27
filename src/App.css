@@ -8,6 +8,10 @@
   --contract-purple: #9B6BFF;
   --danger-orange: #FF8A3D;
   --black-state: #1A1A1A;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --header-reserve-height: 48px;
+  --reserved-ad-height: 64px;
 }
 
 * {
@@ -76,12 +80,127 @@ button {
   max-height: 100%;
   overflow: hidden;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border: 1px solid rgba(126, 230, 255, 0.22);
   border-radius: 24px;
   background:
     radial-gradient(circle at 72% 4%, rgba(126, 230, 255, 0.16), transparent 26%),
     linear-gradient(180deg, rgba(13, 33, 72, 0.98), rgba(6, 15, 34, 0.98));
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+}
+
+.adHeaderReserve,
+.adBannerReserve {
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px dashed rgba(126, 230, 255, 0.34);
+  border-radius: 10px;
+  color: rgba(244, 248, 255, 0.68);
+  background:
+    linear-gradient(180deg, rgba(7, 25, 60, 0.72), rgba(3, 13, 33, 0.66));
+  box-shadow: inset 0 0 0 1px rgba(244, 248, 255, 0.04);
+}
+
+.adHeaderReserve {
+  order: 1;
+  min-height: var(--header-reserve-height);
+  padding: 6px 8px;
+}
+
+.adBannerReserve {
+  order: 3;
+  min-height: var(--reserved-ad-height);
+  justify-content: center;
+  padding: 8px 12px max(8px, var(--safe-bottom));
+}
+
+.adHeaderReserve span,
+.adBannerReserve span {
+  color: var(--cyan);
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 0;
+}
+
+.adHeaderReserve button {
+  min-height: 28px;
+  border: 1px solid rgba(126, 230, 255, 0.4);
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 900;
+  background: rgba(77, 166, 255, 0.18);
+}
+
+.gameContentArea {
+  position: relative;
+  order: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ad-showing .gameContentArea {
+  pointer-events: none;
+}
+
+.mockFullscreenAd {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(1, 6, 18, 0.78);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.mockFullscreenAd > div {
+  width: min(100%, 320px);
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(126, 230, 255, 0.54);
+  border-radius: 14px;
+  padding: 22px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(7, 25, 60, 0.94), rgba(3, 13, 33, 0.94));
+  box-shadow: 0 0 32px rgba(77, 166, 255, 0.34), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+}
+
+.mockFullscreenAd span {
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.mockFullscreenAd strong {
+  color: var(--white);
+  font-size: 28px;
+}
+
+.mockFullscreenAd p {
+  margin: 0;
+  color: rgba(244, 248, 255, 0.78);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.mockFullscreenAd button {
+  min-height: 46px;
+  border: 1px solid rgba(126, 230, 255, 0.62);
+  border-radius: 10px;
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 1000;
+  background: linear-gradient(180deg, rgba(126, 230, 255, 0.32), rgba(24, 100, 218, 0.82));
+  box-shadow: 0 0 22px rgba(77, 166, 255, 0.36);
 }
 
 .homeScreen,
