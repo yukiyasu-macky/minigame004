@@ -424,6 +424,11 @@ function TitleScreen({ onStart }) {
         <span />
         <span />
       </div>
+      <nav className="titleHeaderActions" aria-label="タイトルメニュー">
+        <button type="button">メニュー</button>
+        <button type="button">データ連携</button>
+        <span>Ver.0.2.0</span>
+      </nav>
       <div className="comicLogo" aria-label="貸した魔力はリボ払いで強制徴収">
         <span className="logoSplash" />
         <span className="logoLine">貸した魔力は</span>
@@ -447,8 +452,6 @@ function TitleScreen({ onStart }) {
         <span className="magicOrb orbTwo" />
         <span className="magicOrb orbThree" />
       </div>
-      <p className="catchCopy">あと1チェインだけ…！ 助かった…！！</p>
-      <button className="startButton" type="button" onClick={onStart}>START <span>→</span></button>
       <div className="rulePanel" aria-label="ルールはカンタン">
         <strong>ルールはカンタン！</strong>
         <div className="ruleCards">
@@ -458,12 +461,8 @@ function TitleScreen({ onStart }) {
         </div>
         <p>貸した魔力には、必ず利息がつきます。</p>
       </div>
-      <footer className="titleFooter">
-        <button type="button">メニュー</button>
-        <button type="button">遊び方</button>
-        <button type="button">実績</button>
-        <span>Ver.0.2.0</span>
-      </footer>
+      <p className="catchCopy">あと1チェインだけ…！ 助かった…！！</p>
+      <button className="startButton" type="button" onClick={onStart}>START <span>→</span></button>
     </section>
   );
 }

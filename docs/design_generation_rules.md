@@ -1,0 +1,50 @@
+# Design Generation Rules
+
+`minigame004` の UI / スプライト / FX / 画像生成は、添付の「スプライトデザインシート（参考デザイン）」を最優先ビジュアル基準として扱う。
+
+## Visual Baseline
+
+- 2D pixel art / HD-2D inspired.
+- 黒UI + 青 / シアン / 紫発光を基調にする。
+- 太めアウトライン、高コントラスト、小型でも読めるシルエットを優先する。
+- キャラクターは 64x64 基準の小型ドットを基本にする。
+- UI、FX、ピース、ゲージ、契約アイコンは同じゲームに見える発光量とドット密度に統一する。
+
+## Priority Assets
+
+- 5色ピースは添付デザインシート準拠にする。
+  - blue water
+  - green leaf
+  - yellow light/star
+  - red fire
+  - purple magic/swirl
+- chain line は青白発光で、選択中ピースを気持ちよくつなぐ。
+- debt gauge は青 / 黄 / 赤 / 黒の4段階にする。
+- 黒状態は危険表現だけでなく、覚醒 / フィーバーとして紫青発光を強める。
+- selecting popover は黒UI + 青紫ネオン枠にする。
+
+## Text And Layout Rules
+
+- 文字は画像に焼き込まない。
+- UI文字、数値、説明文は React 側で載せる。
+- 1アセット1画像を基本にする。
+- デザインシート形式で実装素材を作らない。
+- 透過PNG / pixelated 前提で作る。
+- スプライトシートにする場合は横一列、同一フレームサイズ、余白なしを基本にする。
+
+## Prohibited Direction
+
+- ホラー。
+- 血。
+- グロ。
+- 闇金チラシ風。
+- 赤黒過多。
+- 写実。
+- 3D。
+- 盤面を覆う演出。
+- キャラ巨大化。
+- UI過密。
+
+## Implementation Note
+
+生成画像がそのまま実装に使えない場合は、Codex 側で背景透過、トリミング、64x64整列、横一列 sprite sheet 化を行う。見た目の方向性は必ずデザインシートに戻して確認する。
