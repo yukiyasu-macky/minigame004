@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { BATTLE_PHASE, SPRITES } from "./spriteRegistry";
 
@@ -85,12 +85,6 @@ const CONTRACT_TONES = {
   lazyDeal: "#FFD24A",
   lifeFinance: "#7EE6FF",
 };
-
-const FINAL_CONTRACTS = [
-  { id: "soulCollateral", name: "魂担保", icon: "魂", text: "最終利益×2。ただし赤字なら破産演出強化。" },
-  { id: "defaultGamble", name: "踏み倒し賭博", icon: "賭", text: "50%で借金0。50%で借金2倍。" },
-  { id: "safeSettlement", name: "安全清算", icon: "安", text: "借金-30%。最終利益ボーナスなし。" },
-];
 
 const getPiece = (id) => PIECES.find((piece) => piece.id === id);
 const randomPiece = () => PIECES[Math.floor(Math.random() * (PIECES.length - 1))].id;
@@ -387,7 +381,7 @@ const randomRewards = (preferRare = false) => {
 };
 
 const initialGame = () => ({
-  screen: "home",
+  screen: "title",
   characterId: "greed",
   board: makeBoard(),
   path: [],
@@ -403,6 +397,7 @@ const initialGame = () => ({
   turn: 1,
   contracts: [],
   rewards: [],
+  rewardOpen: false,
   overdue: false,
   interestPenalty: 0,
   curseCount: 0,
@@ -473,75 +468,60 @@ function TitleScreen({ onStart }) {
   );
 }
 
-function CharacterSelect({ selectedId, onSelect, onNext }) {
-  const selected = CHARACTERS.find((character) => character.id === selectedId) || CHARACTERS[0];
+function HomeScreen({ game, character, onPlay }) {
+  const predictedFinal = game.totalProfit + game.finalProfitBonus - game.totalDebt - game.totalInterest;
+  const debtState = getDebtState(game.totalDebt);
+  const activeContracts = game.contracts.length ? game.contracts : CONTRACTS.slice(0, 4);
 
   return (
-    <section className="characterScreen screen">
+    <section className="homeHubScreen screen">
       <header className="selectHeader">
-        <button className="backButton" type="button" aria-label="戻る">‹</button>
         <div>
-          <h1>キャラ選択</h1>
-          <p>プレイするキャラクターを選んでください</p>
+          <h1>HOME</h1>
+          <p>契約を確認して、次の欲張りへ進む。</p>
         </div>
       </header>
-      <div className="characterGrid">
-        {CHARACTERS.map((character) => (
-          <button
-            className={`characterCard ${selectedId === character.id ? "active" : ""}`}
-            key={character.id}
-            onClick={() => onSelect(character.id)}
-            style={{ "--character-color": character.tone }}
-            type="button"
-          >
-            <span className="cardFigure" />
-            <span className="sinSigil">{character.en.slice(0, 1)}</span>
-            <strong>{character.name}</strong>
-            <small>{character.en}</small>
-            {selectedId === character.id && <em>SELECTED</em>}
-          </button>
-        ))}
-      </div>
-      <section className="characterDetail" style={{ "--character-color": selected.tone }}>
+
+      <section className="characterDetail homeHubDetail" style={{ "--character-color": character.tone }}>
         <div className="detailIdentity">
-          <span className="detailSigil">{selected.en.slice(0, 1)}</span>
-          <h2>{selected.name}</h2>
-          <strong>{selected.en}</strong>
+          <span className="detailSigil">{character.en.slice(0, 1)}</span>
+          <h2>{character.name}</h2>
+          <strong>{character.en}</strong>
           <dl>
-            <div><dt>難易度</dt><dd>{"★".repeat(selected.difficulty)}{"☆".repeat(5 - selected.difficulty)}</dd></div>
-            <div><dt>リスク傾向</dt><dd>{selected.risk}</dd></div>
-            <div><dt>プレイスタイル</dt><dd>{selected.style}</dd></div>
+            <div><dt>現在利益</dt><dd className="profitText">¥ {formatMoney(game.totalProfit)}</dd></div>
+            <div><dt>現在借金</dt><dd className="debtText">¥ {formatMoney(game.totalDebt)}</dd></div>
+            <div><dt>予測最終利益</dt><dd className={predictedFinal >= 0 ? "profitText" : "debtText"}>{predictedFinal >= 0 ? "+" : "-"}¥ {formatMoney(Math.abs(predictedFinal))}</dd></div>
           </dl>
         </div>
         <div className="detailText">
-          <p>{selected.lead}</p>
+          <p>{character.lead}</p>
           <div className="effectBox">
-            <h3>初期効果</h3>
+            <h3>現在build</h3>
             <ul>
-              <li>{selected.text}</li>
-              <li>チェインボーナス +10%</li>
-              <li>借金ゲージを攻める</li>
+              <li>使用キャラ：{character.name}（{character.text}）</li>
+              <li>借金状態：{debtState.label}（{debtState.text}）</li>
+              <li>契約数：{game.contracts.length}</li>
             </ul>
           </div>
           <div className="styleBox">
-            <h3>おすすめプレイスタイル</h3>
+            <h3>メニュー</h3>
             <ul>
-              <li>長いチェインを狙う</li>
-              <li>借金ゲージを攻める</li>
-              <li>一気に利益を伸ばす</li>
+              <li>遊び方</li>
+              <li>実績</li>
+              <li>設定 / Ver.0.2.0</li>
             </ul>
           </div>
           <div className="initialContracts">
-            {CONTRACTS.slice(0, 3).map((contract) => (
+            {activeContracts.map((contract) => (
               <span key={contract.id}><b>{contract.icon}</b>{contract.name}</span>
             ))}
           </div>
         </div>
       </section>
-      <button className="decideButton" type="button" onClick={onNext}>このキャラで決定</button>
+      <button className="decideButton" type="button" onClick={onPlay}>MAPへ進む</button>
       <footer className="selectFooter">
-        <button type="button">キャラ詳細</button>
-        <button type="button">おすすめ編成</button>
+        <button type="button">遊び方</button>
+        <button type="button">実績</button>
       </footer>
     </section>
   );
@@ -669,11 +649,7 @@ function DebtGauge({ debt, previewDebt = debt }) {
   );
 }
 
-function RewardScreen({ game, onChoose }) {
-  const stage = STAGES[game.stageIndex];
-  const debtState = getDebtState(game.totalDebt);
-  const debtPercent = Math.min(100, (game.totalDebt / MAX_DEBT) * 100);
-  const projectedFinal = game.totalProfit - game.totalDebt - game.totalInterest;
+function RewardModal({ game, onChoose }) {
   const rewardStyles = [
     { rarity: "SSR", title: "高利の錬金術", tone: "gold", synergy: "相性：◎ 連鎖効果が大幅強化！" },
     { rarity: "SR", title: "暴走魔力の契約", tone: "purple", synergy: "相性：○ チェイン特化ビルドに最適！" },
@@ -682,185 +658,62 @@ function RewardScreen({ game, onChoose }) {
   const ownedContracts = game.contracts.length ? game.contracts : CONTRACTS.slice(0, 5);
 
   return (
-    <section className="rewardScreen screen">
-      <header className="rewardTop">
-        <div className="stageStack">
-          <div><span>STAGE</span><strong>{game.stageIndex + 1}<em>/9</em></strong></div>
-          <div><span>TURN</span><strong>{game.turn}</strong></div>
-        </div>
-        <div className="enemyPanel">
-          <h1><span>{stage.type || "通常戦"}</span>{stage.name}</h1>
-          <div className="enemyBar"><i style={{ width: `${Math.max(0, (game.enemyHp / stage.hp) * 100)}%` }} /></div>
-          <strong>{formatMoney(game.enemyHp)} <em>/ {formatMoney(stage.hp)}</em></strong>
-        </div>
-        <div className="rewardHp">
-          <span>PLAYER HP</span>
-          <strong>{game.hp}<em>/ {PLAYER_MAX_HP}</em></strong>
-          <div className="hpBar"><i style={{ width: `${Math.max(0, (game.hp / PLAYER_MAX_HP) * 100)}%` }} /></div>
-        </div>
-      </header>
+    <div className="rewardModalOverlay" role="dialog" aria-modal="true" aria-labelledby="reward-modal-title">
+      <section className="rewardModalPanel rewardScreen">
+        <section className="rewardTitle">
+          <i />
+          <h2 id="reward-modal-title">撃破！契約を選び取れ</h2>
+          <p>Battleの熱量を切らず、危険な3択から1つ選ぶ。</p>
+        </section>
 
-      <section className="rewardTitle">
-        <i />
-        <h2>契約を選び取れ</h2>
-        <p>この選択が、君の未来を決める。</p>
-      </section>
+        <section className="rewardCards">
+          {game.rewards.map((contract, index) => {
+            const style = rewardStyles[index] || rewardStyles[2];
+            const parts = contract.text.split(" / ");
+            return (
+              <button className={`rewardCard ${style.tone}`} key={`${contract.id}-${index}`} type="button" onClick={() => onChoose(contract)}>
+                <span className="newBadge">新規契約</span>
+                <b>{style.rarity}</b>
+                <div className="rewardIcon">{contract.icon}</div>
+                <h3>{index === 0 ? style.title : contract.name}</h3>
+                <p>{contract.text}</p>
+                <dl>
+                  <div><dt>効果</dt><dd>{parts[0] || "契約効果"}</dd></div>
+                  <div><dt>リスク</dt><dd>{parts[1] || "追加なし"}</dd></div>
+                </dl>
+                <div className="synergy">
+                  {ownedContracts.slice(0, 2).map((owned, ownedIndex) => (
+                    <span key={`${owned.id}-${ownedIndex}`}><i>{owned.icon}</i>{owned.name}</span>
+                  ))}
+                </div>
+                <small>{style.synergy}</small>
+              </button>
+            );
+          })}
+        </section>
 
-      <section className="rewardCards">
-        {game.rewards.map((contract, index) => {
-          const style = rewardStyles[index] || rewardStyles[2];
-          const parts = contract.text.split(" / ");
-          return (
-            <button className={`rewardCard ${style.tone}`} key={`${contract.id}-${index}`} type="button" onClick={() => onChoose(contract)}>
-              <span className="newBadge">新規契約</span>
-              <b>{style.rarity}</b>
-              <div className="rewardIcon">{contract.icon}</div>
-              <h3>{index === 0 ? style.title : contract.name}</h3>
-              <p>{contract.text}</p>
-              <dl>
-                <div><dt>{parts[0] || "契約効果"}</dt><dd>{index === 2 ? "-30%" : "+40%"}</dd></div>
-                <div><dt>{parts[1] || "追加効果"}</dt><dd>{index === 2 ? "+50%" : index === 1 ? "+15%" : "+25%"}</dd></div>
-              </dl>
-              <div className="synergy">
-                {ownedContracts.slice(0, 2).map((owned, ownedIndex) => (
-                  <span key={`${owned.id}-${ownedIndex}`}><i>{owned.icon}</i>{owned.name}</span>
-                ))}
-              </div>
-              <small>{style.synergy}</small>
-            </button>
-          );
-        })}
-      </section>
-
-      <section className="rewardQuestion">
-        <strong>どの契約を選ぶ？</strong>
-        <button type="button" onClick={() => onChoose(null)}>≫ スキップする <span>報酬を放棄する</span></button>
-      </section>
-
-      <section className="rewardBuild">
-        <div className="contractShelf">
-          <span>現在の契約シナジー</span>
-          <div>
-            {ownedContracts.slice(0, 5).map((contract, index) => (
-              <i key={`${contract.id}-${index}`}><b>{contract.icon}</b>{contract.name}</i>
-            ))}
+        <section className="rewardBuild">
+          <div className="contractShelf">
+            <span>現在の契約シナジー</span>
+            <div>
+              {ownedContracts.slice(0, 5).map((contract, index) => (
+                <i key={`${contract.id}-${index}`}><b>{contract.icon}</b>{contract.name}</i>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="buildRadar">
-          <span>現在のビルド傾向</span>
-          <div className="radarShape" />
-          <p>利益力 B / リスク S / 爆発力 B+</p>
-        </div>
-      </section>
-
-      <section className="battleTotals rewardTotals">
-        <div><span>現在利益</span><strong className="profitText">¥{formatMoney(game.totalProfit)}</strong><em>累積利益</em></div>
-        <div><span>現在借金</span><strong className="debtText">¥{formatMoney(game.totalDebt)}</strong><em>返済予定</em></div>
-        <div><span>予測最終利益</span><strong className={projectedFinal > 0 ? "profitText" : "debtText"}>¥{formatMoney(projectedFinal)}</strong><em>利益 - 借金 - 利息</em></div>
-      </section>
-
-      <section className="battleDebtRow rewardDebt">
-        <div className="wideGauge">
-          <strong>借金ゲージ</strong>
-          <div className="segmentedGauge">
-            <span className="segmentBlue" />
-            <span className="segmentYellow" />
-            <span className="segmentRed" />
-            <span className="segmentBlack" />
-            <em style={{ left: `${debtPercent}%` }} />
+          <div className="buildRadar">
+            <span>現在のビルド傾向</span>
+            <div className="radarShape" />
+            <p>利益力 B / リスク S / 爆発力 B+</p>
           </div>
-          <div className="gaugeLabels"><span>安全</span><span>警戒</span><span>危険</span><span>限界</span></div>
-        </div>
-        <div className="interestRate"><span>状態</span><strong>{debtState.label}</strong><em>{debtState.text}</em></div>
+        </section>
+
+        <section className="rewardQuestion">
+          <strong>どの契約を選ぶ？</strong>
+          <button type="button" onClick={() => onChoose(null)}>≫ スキップする <span>報酬を放棄する</span></button>
+        </section>
       </section>
-    </section>
-  );
-}
-
-function InterimReportScreen({ game, onNext }) {
-  const stage = STAGES[game.stageIndex];
-  const debtState = getDebtState(game.totalDebt);
-  const predictedFinal = game.totalProfit - game.totalDebt - game.totalInterest;
-  const lastTurn = game.lastTurn || { profit: 0, debtGain: 0, damage: 0, enemyAttack: 0 };
-  const isBossCollection = Boolean(stage.interestRate);
-  const title = isBossCollection ? (stage.type === "中ボス" ? "中間徴収" : "利息徴収") : "中間精算予測";
-
-  return (
-    <section className="interimScreen screen">
-      <header className="interimHero">
-        <span>戦闘結果</span>
-        <h2>{stage.name} 撃破</h2>
-        <p>{isBossCollection ? "徴収は終わった。だが、未来の返済はまだ増えている。" : "勝った直後こそ、破産までの距離を見ろ。"}</p>
-      </header>
-
-      <section className="turnResultCards">
-        <div><span>獲得利益</span><strong className="profitText">+ ¥{formatMoney(lastTurn.profit)}</strong></div>
-        <div><span>増加借金</span><strong className="debtText">+ ¥{formatMoney(lastTurn.debtGain)}</strong></div>
-        <div><span>与ダメージ</span><strong>{formatMoney(lastTurn.damage)}</strong></div>
-      </section>
-
-      <section className="interimLedger">
-        <h3>{title}</h3>
-        <div><span>現在利益</span><strong className="profitText">¥ {formatMoney(game.totalProfit)}</strong></div>
-        <div><span>現在借金</span><strong className="debtText">¥ {formatMoney(game.totalDebt)}</strong></div>
-        <div><span>現在利息</span><strong className="debtText">¥ {formatMoney(game.totalInterest)}</strong></div>
-        <div><span>予測最終利益</span><strong className={predictedFinal > 0 ? "profitText" : "debtText"}>{predictedFinal < 0 ? "- " : ""}¥ {formatMoney(Math.abs(predictedFinal))}</strong></div>
-      </section>
-
-      <section className="interimDebt">
-        <div className="wideGauge">
-          <strong>借金危険度：{debtState.label}</strong>
-          <div className="segmentedGauge">
-            <span className="segmentBlue" />
-            <span className="segmentYellow" />
-            <span className="segmentRed" />
-            <span className="segmentBlack" />
-            <em style={{ left: `${Math.min(100, (game.totalDebt / MAX_DEBT) * 100)}%` }} />
-          </div>
-          <div className="gaugeLabels"><span>安全</span><span>警戒</span><span>危険</span><span>限界</span></div>
-        </div>
-        <p>今どれだけ破産へ近づいているか。次の契約で、まだ「あと1回」を買えるか？</p>
-      </section>
-
-      <footer className="interimActions">
-        <button type="button" onClick={onNext}>契約を選ぶ <span>報酬3択へ進む</span></button>
-      </footer>
-    </section>
-  );
-}
-
-function FinalContractScreen({ game, onChoose }) {
-  const draft = game.finalDraft || { totalProfit: game.totalProfit, totalDebt: game.totalDebt, totalInterest: game.totalInterest };
-  const predicted = draft.totalProfit + game.finalProfitBonus - draft.totalDebt - draft.totalInterest;
-
-  return (
-    <section className="finalContractScreen screen">
-      <header className="interimHero">
-        <span>FINAL CONTRACT</span>
-        <h2>最後の悪あがき</h2>
-        <p>ラスボスは倒した。だが、まだ精算は終わっていない。もう一回だけ欲張る？</p>
-      </header>
-
-      <section className="interimLedger">
-        <h3>精算直前</h3>
-        <div><span>総利益</span><strong className="profitText">¥ {formatMoney(draft.totalProfit + game.finalProfitBonus)}</strong></div>
-        <div><span>総借金</span><strong className="debtText">¥ {formatMoney(draft.totalDebt)}</strong></div>
-        <div><span>累積利息</span><strong className="debtText">¥ {formatMoney(draft.totalInterest)}</strong></div>
-        <div><span>このまま精算</span><strong className={predicted > 0 ? "profitText" : "debtText"}>{predicted < 0 ? "- " : ""}¥ {formatMoney(Math.abs(predicted))}</strong></div>
-      </section>
-
-      <section className="finalContractGrid">
-        {FINAL_CONTRACTS.map((contract) => (
-          <button key={contract.id} type="button" onClick={() => onChoose(contract)}>
-            <i>{contract.icon}</i>
-            <strong>{contract.name}</strong>
-            <span>{contract.text}</span>
-          </button>
-        ))}
-      </section>
-
-      <p className="settlementTagline">勝ったあとにも欲望は来る。<b>最後まで判断しよう。</b></p>
-    </section>
+    </div>
   );
 }
 
@@ -1049,18 +902,13 @@ export default function App() {
   const preview = calculateTurn(game, game.path.length);
   const previewDebt = Math.min(MAX_DEBT, game.totalDebt + preview.debtGain);
   const character = CHARACTERS.find((item) => item.id === game.characterId);
-  const contractList = useMemo(() => {
-    if (game.contracts.length === 0) return "なし";
-    return game.contracts.map((contract) => contract.name).join(" / ");
-  }, [game.contracts]);
-
   const reset = () => {
     if (isAdShowing) return;
-    setGame(initialGame());
+    setGame({ ...initialGame(), screen: "home" });
   };
   const retry = () => {
     if (isAdShowing) return;
-    setGame({ ...initialGame(), screen: "character" });
+    setGame({ ...initialGame(), screen: "map" });
   };
 
   useEffect(() => () => {
@@ -1123,7 +971,7 @@ export default function App() {
 
   const handleFinishChain = () => {
     if (isAdShowing) return;
-    const isValidRelease = game.screen === "battle" && game.path.length >= 3;
+    const isValidRelease = game.screen === "battle" && !game.rewardOpen && game.path.length >= 3;
     if (isValidRelease) {
       fxTimers.current.forEach((timer) => window.clearTimeout(timer));
       fxTimers.current = [];
@@ -1139,7 +987,7 @@ export default function App() {
     fxTimers.current = [];
     setBattleFx({ phase: BATTLE_PHASE.idle, tick: Date.now() });
     setGame((current) => {
-      if (current.screen !== "battle") return current;
+      if (current.screen !== "battle" || current.rewardOpen) return current;
       return {
         ...current,
         path: [],
@@ -1170,7 +1018,7 @@ export default function App() {
   const addCell = (cell) => {
     if (!cell || isAdShowing) return;
     setGame((current) => {
-      if (current.screen !== "battle") return current;
+      if (current.screen !== "battle" || current.rewardOpen) return current;
       const piece = current.board[cell.row][cell.col];
       if (piece === "curse") return current;
       const exists = current.path.some((item) => keyOf(item) === keyOf(cell));
@@ -1215,7 +1063,7 @@ export default function App() {
   const finishChain = () => {
     if (isAdShowing) return;
     setGame((current) => {
-      if (current.screen !== "battle" || current.path.length < 3) {
+      if (current.screen !== "battle" || current.rewardOpen || current.path.length < 3) {
         return { ...current, path: [], dragging: false, message: "3個以上で成立。もう少し欲張れる。" };
       }
 
@@ -1237,6 +1085,7 @@ export default function App() {
       if (enemyHp <= 0) {
         if (stage.final) {
           const finalDraft = { totalProfit, totalDebt, totalInterest: current.totalInterest };
+          const settlement = createFinalSettlement(current, finalDraft, null, false);
           return {
             ...current,
             board: clearedBoard,
@@ -1250,12 +1099,12 @@ export default function App() {
             maxChain,
             nextProfitBoost: false,
             pleasureBoost: false,
-            screen: "finalContract",
+            screen: "settlement",
             finalDraft,
-            settlement: null,
-            result: null,
+            settlement,
+            result: settlement.finalProfit > 0 ? "clear" : "bankrupt",
             lastTurn: result,
-            message: "徴収王撃破。最後の悪あがきを選べ。",
+            message: settlement.finalProfit > 0 ? "徴収王撃破。精算へ進む。まだ助かった。" : "徴収王撃破。しかし未来の請求が来る。",
           };
         }
 
@@ -1307,8 +1156,9 @@ export default function App() {
           nextProfitBoost,
           pleasureBoost: hasContract(effectiveContracts(current), "pleasureAddiction") && current.path.length >= 8,
           finalProfitBonus,
-          screen: "interim",
+          screen: "battle",
           rewards: randomRewards(preferRare),
+          rewardOpen: true,
           lastTurn: result,
           message: `${stage.name}を撃破。${message}`,
         };
@@ -1374,28 +1224,9 @@ export default function App() {
         stageIndex: nextStageIndex,
         enemyHp: STAGES[nextStageIndex].hp,
         rewards: [],
+        rewardOpen: false,
         screen: "map",
         message: contract ? `${contract.name}を契約。${addedDebt ? "借金を前借りした。以後、利益2倍。" : "今回だけは行ける。"}` : "契約を見送った。身軽だが、上振れも逃した。",
-      };
-    });
-  };
-
-  const chooseFinalContract = (contract) => {
-    if (isAdShowing) return;
-    setGame((current) => {
-      const gambleWin = contract.id === "defaultGamble" ? Math.random() < 0.5 : false;
-      const settlement = createFinalSettlement(current, current.finalDraft, contract, gambleWin);
-      return {
-        ...current,
-        totalProfit: settlement.totalProfit,
-        totalDebt: settlement.totalDebt,
-        maxDebt: Math.max(current.maxDebt, settlement.totalDebt),
-        finalContract: contract,
-        bankruptcyComic: settlement.bankruptcyComic,
-        settlement,
-        result: settlement.finalProfit > 0 ? "clear" : "bankrupt",
-        screen: "settlement",
-        message: `${contract.name}を選択。${settlement.finalProfit > 0 ? "まだ助かった。" : "欲張りすぎました。"}`,
       };
     });
   };
@@ -1432,14 +1263,8 @@ export default function App() {
           onCloseFullscreenAd={closeMockFullscreenAd}
         />
         <div className="gameContentArea" aria-hidden={isAdShowing ? "true" : undefined}>
-          {game.screen === "home" && <TitleScreen onStart={() => !isAdShowing && setGame((current) => ({ ...current, screen: "character" }))} />}
-          {game.screen === "character" && (
-            <CharacterSelect
-              selectedId={game.characterId}
-              onSelect={(characterId) => !isAdShowing && setGame((current) => ({ ...current, characterId }))}
-              onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "map" }))}
-            />
-          )}
+          {game.screen === "title" && <TitleScreen onStart={() => !isAdShowing && setGame((current) => ({ ...current, screen: "home" }))} />}
+          {game.screen === "home" && <HomeScreen game={game} character={character} onPlay={() => !isAdShowing && setGame((current) => ({ ...current, screen: "map" }))} />}
           {game.screen === "map" && <MapScreen game={game} onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "battle" }))} />}
 
           {game.screen === "battle" && (
@@ -1478,7 +1303,7 @@ export default function App() {
                   ref={boardRef}
                   onContextMenu={(event) => event.preventDefault()}
                   onPointerMove={(event) => {
-                    if (isAdShowing || !game.dragging) return;
+                    if (isAdShowing || game.rewardOpen || !game.dragging) return;
                     event.preventDefault();
                     event.stopPropagation();
                     addCell(moveToCell(event.clientX, event.clientY));
@@ -1486,7 +1311,7 @@ export default function App() {
                   onPointerUp={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
-                    if (!isAdShowing) handleFinishChain();
+                    if (!isAdShowing && !game.rewardOpen) handleFinishChain();
                   }}
                   onPointerCancel={(event) => {
                     event.preventDefault();
@@ -1524,7 +1349,7 @@ export default function App() {
                           onPointerDown={(event) => {
                             event.preventDefault();
                             event.stopPropagation();
-                            if (isAdShowing) return;
+                            if (isAdShowing || game.rewardOpen) return;
                             event.currentTarget.setPointerCapture?.(event.pointerId);
                             setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
                             addCell({ row: rowIndex, col: colIndex });
@@ -1554,12 +1379,10 @@ export default function App() {
                   </div>
                 </div>
               </footer>
+              {game.rewardOpen && <RewardModal game={game} onChoose={chooseReward} />}
             </section>
           )}
 
-          {game.screen === "interim" && <InterimReportScreen game={game} onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "reward" }))} />}
-          {game.screen === "reward" && <RewardScreen game={game} onChoose={chooseReward} />}
-          {game.screen === "finalContract" && <FinalContractScreen game={game} onChoose={chooseFinalContract} />}
           {game.screen === "settlement" && <SettlementScreen settlement={game.settlement} onResult={() => !isAdShowing && setGame((current) => ({ ...current, screen: "result" }))} />}
           {game.screen === "result" && <ResultScreen game={game} onRetry={retry} onTitle={reset} />}
         </div>
