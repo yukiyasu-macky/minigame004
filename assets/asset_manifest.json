@@ -192,10 +192,10 @@
       "prompt": "Horizontal strip of five 64x64 puzzle pieces: blue water drop, green leaf, yellow star/coin, red flame, purple swirl. Rounded square gem pieces, glossy pixel art, thick outline, transparent background."
     },
     {
-      "id": "pieces_selected_5color",
+      "id": "piece_selected_5color",
       "category": "piece",
-      "file": "assets/images/pieces/pieces_selected_glow_64x64_5color.png",
-      "runtimeTarget": "public/assets/pieces/pieces_selected_glow_64x64_5color.png",
+      "file": "assets/images/pieces/piece_selected_5color_64x64_5f.png",
+      "runtimeTarget": "public/assets/pieces/piece_selected_5color_64x64_5f.png",
       "frameWidth": 64,
       "frameHeight": 64,
       "frameCount": 5,
