@@ -1250,13 +1250,13 @@ export default function App() {
 
   return (
     <main
-      className={`app app-shell debt-${debtState.id} ${isAdShowing ? "ad-showing" : ""}`}
+      className={`appShell debt-${debtState.id} ${isAdShowing ? "ad-showing" : ""}`}
       style={{
         "--header-reserve-height": `${AD_CONFIG.headerReserveHeight}px`,
         "--reserved-ad-height": `${AD_CONFIG.bannerReserveHeight}px`,
       }}
     >
-      <section className="phone">
+      <section className="gameViewport">
         <AdChrome
           isAdShowing={isAdShowing}
           onShowFullscreenAd={showMockFullscreenAd}
