@@ -2128,11 +2128,24 @@ button {
   pointer-events: none;
 }
 
+.piece:not(.curse) {
+  background:
+    url("/assets/pieces/piece_normal_5color_64x64_5f.png") var(--normal-piece-position, 0%) 0 / 500% 100% no-repeat;
+}
+
+.piece:not(.curse)::before {
+  opacity: 0;
+}
+
 .piece span {
   position: relative;
   z-index: 1;
   font-size: clamp(12px, 3.4vw, 16px);
   font-weight: 1000;
+}
+
+.piece:not(.curse) span {
+  opacity: 0;
 }
 
 .piece em {
@@ -2152,6 +2165,8 @@ button {
 }
 
 .piece.selected {
+  background:
+    url("/assets/pieces/piece_selected_5color_64x64_5f.png") var(--selected-piece-position, 0%) 0 / 500% 100% no-repeat;
   outline: 2px solid var(--white);
   outline-offset: 1px;
   transform: scale(0.94);
@@ -2160,6 +2175,14 @@ button {
     0 0 20px var(--piece-color),
     0 0 28px rgba(126, 230, 255, 0.64),
     inset 0 0 0 2px rgba(244, 248, 255, 0.5);
+}
+
+.piece.selected::before {
+  opacity: 0;
+}
+
+.piece.selected span {
+  opacity: 0;
 }
 
 .phase-selecting .piece:not(.curse) {

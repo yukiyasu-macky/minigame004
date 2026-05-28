@@ -26,12 +26,12 @@ const MAX_DEBT = BALANCE.maxDebt;
 const PLAYER_MAX_HP = BALANCE.playerMaxHp;
 
 const PIECES = [
-  { id: "red", label: "赤", color: "#FF5C5C" },
-  { id: "blue", label: "青", color: "#4DA6FF" },
-  { id: "green", label: "緑", color: "#35D889" },
-  { id: "yellow", label: "黄", color: "#FFD24A" },
-  { id: "purple", label: "紫", color: "#9B6BFF" },
-  { id: "curse", label: "滞", color: "#1A1A1A", curse: true },
+  { id: "red", label: "赤", color: "#FF5C5C", normalSpritePosition: "75%", selectedSpritePosition: "75%" },
+  { id: "blue", label: "青", color: "#4DA6FF", normalSpritePosition: "0%", selectedSpritePosition: "0%" },
+  { id: "green", label: "緑", color: "#35D889", normalSpritePosition: "25%", selectedSpritePosition: "25%" },
+  { id: "yellow", label: "黄", color: "#FFD24A", normalSpritePosition: "50%", selectedSpritePosition: "50%" },
+  { id: "purple", label: "紫", color: "#9B6BFF", normalSpritePosition: "100%", selectedSpritePosition: "100%" },
+  { id: "curse", label: "滞", color: "#1A1A1A", curse: true, normalSpritePosition: "0%", selectedSpritePosition: "0%" },
 ];
 
 const CHARACTERS = [
@@ -1529,7 +1529,11 @@ export default function App() {
                             setBattleFx({ phase: BATTLE_PHASE.selecting, tick: Date.now() });
                             addCell({ row: rowIndex, col: colIndex });
                           }}
-                          style={{ "--piece-color": meta.color }}
+                          style={{
+                            "--piece-color": meta.color,
+                            "--normal-piece-position": meta.normalSpritePosition,
+                            "--selected-piece-position": meta.selectedSpritePosition,
+                          }}
                           type="button"
                         >
                           <span>{meta.label}</span>
