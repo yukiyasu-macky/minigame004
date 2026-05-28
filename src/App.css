@@ -693,7 +693,8 @@ button {
   line-height: 1;
 }
 
-.characterScreen {
+.characterScreen,
+.homeHubScreen {
   position: relative;
   height: 100%;
   display: grid;
@@ -705,7 +706,8 @@ button {
     radial-gradient(circle at 18% 24%, rgba(77, 166, 255, 0.22), transparent 22%);
 }
 
-.characterScreen::before {
+.characterScreen::before,
+.homeHubScreen::before {
   content: "";
   position: absolute;
   inset: -20px;
@@ -723,6 +725,18 @@ button {
 .selectFooter {
   position: relative;
   z-index: 1;
+}
+
+.homeHubScreen {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+
+.homeHubScreen .selectHeader {
+  grid-template-columns: 1fr;
+}
+
+.homeHubDetail {
+  min-height: 0;
 }
 
 .selectHeader {
@@ -2767,6 +2781,53 @@ button {
   line-height: 1.2;
 }
 
+.rewardModalOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  align-items: end;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(1, 6, 18, 0.16), rgba(1, 6, 18, 0.82));
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.rewardModalPanel.rewardScreen {
+  width: 100%;
+  height: auto;
+  max-height: min(88%, 590px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  overflow-y: auto;
+  transform: none;
+  transform-origin: center;
+  border: 1px solid rgba(126, 230, 255, 0.46);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 0 34px rgba(77, 166, 255, 0.36), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+}
+
+.rewardModalPanel .rewardTitle h2 {
+  font-size: 22px;
+}
+
+.rewardModalPanel .rewardCards {
+  min-height: 0;
+}
+
+.rewardModalPanel .rewardCard {
+  grid-template-rows: 16px 20px 40px 32px minmax(42px, auto) 28px 20px;
+  padding: 6px;
+}
+
+.rewardModalPanel .rewardIcon {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+}
+
 .interimScreen {
   position: relative;
   height: 100%;
@@ -4098,6 +4159,7 @@ button {
   .homeScreen,
   .menuScreen,
   .characterScreen,
+  .homeHubScreen,
   .mapScreen,
   .battleScreen,
   .rewardScreen,
@@ -4153,7 +4215,8 @@ button {
     padding-bottom: max(14px, env(safe-area-inset-bottom));
   }
 
-  .characterScreen {
+  .characterScreen,
+  .homeHubScreen {
     grid-template-rows: auto 278px auto auto auto;
     gap: 8px;
   }
@@ -4351,6 +4414,7 @@ button {
 
   .homeScreen,
   .characterScreen,
+  .homeHubScreen,
   .rewardScreen,
   .interimScreen,
   .finalContractScreen,
@@ -4443,7 +4507,8 @@ button {
     font-size: 15px;
   }
 
-  .characterScreen {
+  .characterScreen,
+  .homeHubScreen {
     grid-template-rows: auto minmax(190px, 33dvh) auto auto auto;
     gap: 7px;
   }
@@ -4987,7 +5052,8 @@ button {
     max-height: 30dvh;
   }
 
-  .characterScreen {
+  .characterScreen,
+  .homeHubScreen {
     grid-template-rows: auto 178px auto auto auto;
   }
 
@@ -5042,4 +5108,22 @@ button {
   .rewardCard {
     min-height: 200px;
   }
+}
+
+.rewardModalOverlay .rewardModalPanel.rewardScreen {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: min(88%, 590px);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  overflow-y: auto;
+  transform: none;
+}
+
+.rewardModalOverlay .rewardCards {
+  min-height: 0;
+}
+
+.rewardModalOverlay .rewardCard {
+  min-height: 0;
 }
