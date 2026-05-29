@@ -301,6 +301,229 @@ button {
   white-space: nowrap;
 }
 
+.titleVersion {
+  justify-self: start;
+  border: 2px solid rgba(169, 111, 255, 0.85);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--white);
+  font-size: 13px;
+  line-height: 1;
+  background: rgba(9, 5, 22, 0.9);
+  box-shadow: 0 0 14px rgba(155, 107, 255, 0.48), inset 0 0 0 1px rgba(244, 248, 255, 0.12);
+}
+
+.titleMenuPanel {
+  position: absolute;
+  right: 2px;
+  top: calc(100% + 6px);
+  z-index: 8;
+  width: min(190px, 62vw);
+  display: grid;
+  gap: 6px;
+  border: 2px solid rgba(155, 107, 255, 0.76);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(7, 5, 18, 0.94);
+  box-shadow: 0 0 24px rgba(155, 107, 255, 0.48), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+}
+
+.titleMenuPanel button {
+  min-height: 32px;
+  text-align: left;
+}
+
+.titleVisual {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid rgba(155, 107, 255, 0.6);
+  border-radius: 12px;
+  background: #0d0b18;
+  box-shadow:
+    0 0 22px rgba(155, 107, 255, 0.34),
+    inset 0 0 0 1px rgba(244, 248, 255, 0.12);
+  image-rendering: pixelated;
+}
+
+.titleDungeonBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: saturate(1.05) brightness(1.05);
+}
+
+.titlePixelLogo {
+  position: absolute;
+  left: 50%;
+  top: 5%;
+  width: min(76%, 330px);
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 0 #05040c) drop-shadow(0 0 10px rgba(126, 230, 255, 0.46));
+}
+
+.titlePixelLogo span {
+  color: #dff2ff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(42px, 14vw, 70px);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.85;
+  -webkit-text-stroke: 3px #05040c;
+  text-shadow:
+    0 5px 0 #1b6fb7,
+    4px 4px 0 #05040c,
+    0 0 10px rgba(126, 230, 255, 0.5);
+}
+
+.titlePixelLogo span:last-child {
+  color: #d9c1ff;
+  text-shadow:
+    0 5px 0 #6f45bd,
+    4px 4px 0 #05040c,
+    0 0 10px rgba(155, 107, 255, 0.52);
+}
+
+.titlePixelLogo::after {
+  content: "";
+  width: 74%;
+  height: 11px;
+  margin-top: -3px;
+  border: 2px solid rgba(155, 107, 255, 0.9);
+  border-radius: 999px;
+  background: rgba(16, 7, 42, 0.92);
+  box-shadow: 0 0 12px rgba(155, 107, 255, 0.5);
+}
+
+.titleMainCopy {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  min-width: 70%;
+  margin: 0;
+  border: 2px solid rgba(155, 107, 255, 0.82);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: var(--white);
+  font-size: clamp(12px, 3.7vw, 16px);
+  font-weight: 1000;
+  text-align: center;
+  background: rgba(8, 5, 19, 0.92);
+  box-shadow: 0 0 16px rgba(155, 107, 255, 0.38);
+  transform: translateX(-50%);
+}
+
+.titleMainCopy strong {
+  color: #ff4bd5;
+}
+
+.titleRent,
+.titleMp,
+.titleSpeech img {
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+.titleRent {
+  left: 20%;
+  bottom: 12%;
+  width: min(22%, 88px);
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.5));
+}
+
+.titleMp {
+  right: 27%;
+  bottom: 23%;
+  width: min(18%, 68px);
+  filter: drop-shadow(0 0 12px rgba(244, 248, 255, 0.6));
+}
+
+.titleSpeech {
+  position: absolute;
+  right: 9%;
+  top: 42%;
+  width: min(38%, 176px);
+  aspect-ratio: 186 / 91;
+}
+
+.titleSpeech img {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.titleSpeech span {
+  position: absolute;
+  left: 11%;
+  top: 22%;
+  color: #18100b;
+  font-size: clamp(12px, 3.5vw, 16px);
+  font-weight: 1000;
+}
+
+.titleVisual .catchCopy {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  justify-self: auto;
+  margin: 0;
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.titleLoadingPanel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+  border: 2px solid rgba(155, 107, 255, 0.64);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(7, 5, 18, 0.86);
+  box-shadow: 0 0 16px rgba(155, 107, 255, 0.28), inset 0 0 0 1px rgba(244, 248, 255, 0.08);
+}
+
+.titleLoadingPanel span {
+  color: rgba(244, 248, 255, 0.78);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.titleLoadingPanel i {
+  grid-column: 1 / -1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(244, 248, 255, 0.1);
+}
+
+.titleLoadingPanel i::before {
+  content: "";
+  display: block;
+  width: 68%;
+  height: 100%;
+  background: linear-gradient(90deg, #334cff, var(--cyan), #f1f7ff);
+  box-shadow: 0 0 12px rgba(126, 230, 255, 0.72);
+}
+
+.titleTouchStart {
+  min-height: 54px;
+  border: 2px solid rgba(155, 107, 255, 0.85);
+  clip-path: none;
+  color: #efe7ff;
+  font-size: clamp(22px, 7vw, 36px);
+  background: rgba(8, 5, 19, 0.94);
+  box-shadow: 0 0 22px rgba(155, 107, 255, 0.62), inset 0 0 0 1px rgba(244, 248, 255, 0.16);
+  text-shadow: 0 3px 0 #281056, 0 0 10px rgba(155, 107, 255, 0.82);
+}
+
 .comicLogo {
   position: relative;
   min-height: 138px;
@@ -5117,6 +5340,42 @@ button {
 
 .rewardModalOverlay .rewardCard {
   min-height: 0;
+}
+
+/* Title MVP override: keep controls above the banner reserve and the CTA clear. */
+.homeScreen {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+}
+
+.homeScreen .titleVisual {
+  min-height: 0;
+}
+
+.startButton.titleTouchStart {
+  min-height: 54px;
+  border: 2px solid rgba(155, 107, 255, 0.85);
+  border-radius: 8px;
+  clip-path: none;
+  color: #efe7ff;
+  font-size: clamp(22px, 7vw, 36px);
+  background: rgba(8, 5, 19, 0.94);
+  box-shadow: 0 0 22px rgba(155, 107, 255, 0.62), inset 0 0 0 1px rgba(244, 248, 255, 0.16);
+  text-shadow: 0 3px 0 #281056, 0 0 10px rgba(155, 107, 255, 0.82);
+}
+
+@media (max-height: 760px) {
+  .homeScreen {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  .titlePixelLogo span {
+    font-size: clamp(35px, 12vw, 58px);
+  }
+
+  .titleLoadingPanel {
+    padding-block: 6px;
+  }
 }
 
 /* Final shell guard: all game screens live between header and banner reserves. */

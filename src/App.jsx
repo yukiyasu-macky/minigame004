@@ -92,6 +92,7 @@ const keyOf = ({ row, col }) => `${row}-${col}`;
 const isNeighbor = (a, b) => Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col)) === 1;
 const formatMoney = (value) => Math.round(value).toLocaleString("ja-JP");
 const countContract = (contracts, id) => contracts.filter((contract) => contract.id === id).length;
+const titleAsset = (fileName) => `${import.meta.env.BASE_URL}assets/title/${fileName}`;
 
 function PixelSprite({ id, className = "", label }) {
   const sprite = SPRITES[id];
@@ -415,6 +416,8 @@ const initialGame = () => ({
 });
 
 function TitleScreen({ onStart }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <section className="homeScreen screen">
       <div className="homeSparkles" aria-hidden="true">
@@ -425,44 +428,39 @@ function TitleScreen({ onStart }) {
         <span />
       </div>
       <nav className="titleHeaderActions" aria-label="タイトルメニュー">
-        <button type="button">メニュー</button>
-        <button type="button">データ連携</button>
-        <span>Ver.0.2.0</span>
+        <span className="titleVersion">VER 1.0.0</span>
+        <button type="button">お知らせ</button>
+        <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen}>メニュー</button>
+        {menuOpen && (
+          <div className="titleMenuPanel">
+            <button type="button">データ連携</button>
+            <button type="button">お知らせ</button>
+            <button type="button">設定</button>
+            <button type="button">ヘルプ</button>
+          </div>
+        )}
       </nav>
-      <div className="comicLogo" aria-label="貸した魔力はリボ払いで強制徴収">
-        <span className="logoSplash" />
-        <span className="logoLine">貸した魔力は</span>
-        <strong>
-          <mark>リボ払い</mark>
-          <span>で</span>
-          <b>強制徴収</b>
-        </strong>
-        <em>借金で快楽を前借りするローグライク</em>
-      </div>
-      <div className="heroVisual" aria-hidden="true">
-        <div className="magicRing" />
-        <div className="magicRing innerRing" />
-        <div className="chainLine chainLeft" />
-        <div className="chainLine chainRight" />
-        <div className="greedFigure"><i /><b /><em /><strong /></div>
-        <div className="contractCard cardOne"><small>契約書</small><span>利息は全て<br />あなたのものに<br />なります……</span></div>
-        <div className="contractCard cardTwo"><small>魔力契約</small><span>返済不能時<br />追加徴収</span></div>
-        <div className="contractCard cardThree"><small>魔力印</small></div>
-        <span className="magicOrb orbOne" />
-        <span className="magicOrb orbTwo" />
-        <span className="magicOrb orbThree" />
-      </div>
-      <div className="rulePanel" aria-label="ルールはカンタン">
-        <strong>ルールはカンタン！</strong>
-        <div className="ruleCards">
-          <div><span>🔗</span><b>パズルをつなげて<br />魔力を回収！</b></div>
-          <div><span>🪙</span><b>利益を増やして<br />もっと借りる！</b></div>
-          <div><span>⚖</span><b>最後に利息を払って<br />黒字を目指せ！</b></div>
+      <div className="titleVisual">
+        <img className="titleDungeonBg" src={titleAsset("title_bg_dungeon.png")} alt="" />
+        <div className="titlePixelLogo" aria-label="GREED CHAIN">
+          <span>GREED</span>
+          <span>CHAIN</span>
         </div>
-        <p>貸した魔力には、必ず利息がつきます。</p>
+        <p className="titleMainCopy">貸した魔力はリボ払いで<strong>強制徴収</strong></p>
+        <img className="titleRent" src={titleAsset("title_rent.png")} alt="奥のダンジョンへ誘うレント" />
+        <img className="titleMp" src={titleAsset("title_mp.png")} alt="浮遊するエムピー" />
+        <div className="titleSpeech">
+          <img src={titleAsset("title_speech_bubble.png")} alt="" />
+          <span>貸した魔力は…</span>
+        </div>
+        <p className="catchCopy">あと1チェインだけ…</p>
       </div>
-      <p className="catchCopy">あと1チェインだけ…！ 助かった…！！</p>
-      <button className="startButton" type="button" onClick={onStart}>START <span>→</span></button>
+      <div className="titleLoadingPanel">
+        <span>契約確認中...</span>
+        <span>魔力計算中...</span>
+        <i />
+      </div>
+      <button className="startButton titleTouchStart" type="button" onClick={onStart}>TOUCH TO START</button>
     </section>
   );
 }
