@@ -465,60 +465,69 @@ function TitleScreen({ onStart }) {
   );
 }
 
-function HomeScreen({ game, character, onPlay }) {
-  const predictedFinal = game.totalProfit + game.finalProfitBonus - game.totalDebt - game.totalInterest;
-  const debtState = getDebtState(game.totalDebt);
-  const activeContracts = game.contracts.length ? game.contracts : CONTRACTS.slice(0, 4);
-
+function HomeScreen({ onPlay }) {
   return (
-    <section className="homeHubScreen screen">
-      <header className="selectHeader">
-        <div>
-          <h1>HOME</h1>
-          <p>契約を確認して、次の欲張りへ進む。</p>
+    <section className="homeHubScreen homeGuildScreen screen">
+      <header className="homeTopBar">
+        <div className="homeMagicGauge" aria-label="魔力 58 / 60">
+          <span className="homeMagicIcon" aria-hidden="true">魔</span>
+          <div className="homeMagicInfo">
+            <div className="homeMagicLabel">
+              <strong>魔力</strong>
+              <b>58/60</b>
+            </div>
+            <span className="homeMagicBar"><i /></span>
+            <small>回復まで 01:23</small>
+          </div>
+          <button type="button" aria-label="魔力を加算">+</button>
         </div>
+        <nav className="homeTopActions" aria-label="ホームメニュー">
+          <button type="button"><b>!</b><span>お知らせ</span></button>
+          <button type="button"><b>3</b><span>プレゼント</span></button>
+          <button type="button"><b>!</b><span>ミッション</span></button>
+          <button type="button"><b>≡</b><span>メニュー</span></button>
+        </nav>
       </header>
 
-      <section className="characterDetail homeHubDetail" style={{ "--character-color": character.tone }}>
-        <div className="detailIdentity">
-          <span className="detailSigil">{character.en.slice(0, 1)}</span>
-          <h2>{character.name}</h2>
-          <strong>{character.en}</strong>
-          <dl>
-            <div><dt>現在利益</dt><dd className="profitText">¥ {formatMoney(game.totalProfit)}</dd></div>
-            <div><dt>現在借金</dt><dd className="debtText">¥ {formatMoney(game.totalDebt)}</dd></div>
-            <div><dt>予測最終利益</dt><dd className={predictedFinal >= 0 ? "profitText" : "debtText"}>{predictedFinal >= 0 ? "+" : "-"}¥ {formatMoney(Math.abs(predictedFinal))}</dd></div>
-          </dl>
+      <main className="homeMainArea">
+        <div className="homeGuildBg" aria-hidden="true">
+          <span className="guildWindow left" />
+          <span className="guildWindow right" />
+          <span className="guildBanner" />
+          <span className="guildCounter" />
+          <span className="guildRug" />
         </div>
-        <div className="detailText">
-          <p>{character.lead}</p>
-          <div className="effectBox">
-            <h3>現在build</h3>
-            <ul>
-              <li>使用キャラ：{character.name}（{character.text}）</li>
-              <li>借金状態：{debtState.label}（{debtState.text}）</li>
-              <li>契約数：{game.contracts.length}</li>
-            </ul>
-          </div>
-          <div className="styleBox">
-            <h3>メニュー</h3>
-            <ul>
-              <li>遊び方</li>
-              <li>実績</li>
-              <li>設定 / Ver.0.2.0</li>
-            </ul>
-          </div>
-          <div className="initialContracts">
-            {activeContracts.map((contract) => (
-              <span key={contract.id}><b>{contract.icon}</b>{contract.name}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-      <button className="decideButton" type="button" onClick={onPlay}>MAPへ進む</button>
-      <footer className="selectFooter">
-        <button type="button">遊び方</button>
-        <button type="button">実績</button>
+
+        <aside className="homeDailyBoard" aria-label="本日の依頼掲示板">
+          <h2>本日の依頼掲示板</h2>
+          <article>
+            <span>NEW</span>
+            <strong>ゴブリンの討伐依頼</strong>
+            <small>推奨 Lv.10</small>
+          </article>
+          <article>
+            <span>おすすめ</span>
+            <strong>魔獣の素材収集</strong>
+            <small>推奨 Lv.15</small>
+          </article>
+          <button type="button">もっと見る</button>
+        </aside>
+
+        <div className="homeGuildSign" aria-hidden="true">冒険者<br />GUILD</div>
+        <img className="homeCharacterRent" src={titleAsset("title_rent.png")} alt="探索へ誘うレント" />
+        <img className="homeCharacterMp" src={titleAsset("title_mp.png")} alt="浮遊するエムピー" />
+      </main>
+
+      <button className="homeStartButton" type="button" onClick={onPlay}>
+        探索開始
+        <span>- 魔力回収に出発する -</span>
+      </button>
+
+      <footer className="homeBottomNav" aria-label="ホーム下部ナビ">
+        <button type="button"><span>冒</span>冒険者</button>
+        <button type="button"><span>契</span>契約図鑑</button>
+        <button type="button"><span>杯</span>実績</button>
+        <button type="button"><span>店</span>ショップ</button>
       </footer>
     </section>
   );
@@ -1261,7 +1270,7 @@ export default function App() {
         />
         <div className="gameContentArea" aria-hidden={isAdShowing ? "true" : undefined}>
           {game.screen === "title" && <TitleScreen onStart={() => !isAdShowing && setGame((current) => ({ ...current, screen: "home" }))} />}
-          {game.screen === "home" && <HomeScreen game={game} character={character} onPlay={() => !isAdShowing && setGame((current) => ({ ...current, screen: "map" }))} />}
+          {game.screen === "home" && <HomeScreen onPlay={() => !isAdShowing && setGame((current) => ({ ...current, screen: "map" }))} />}
           {game.screen === "map" && <MapScreen game={game} onNext={() => !isAdShowing && setGame((current) => ({ ...current, screen: "battle" }))} />}
 
           {game.screen === "battle" && (

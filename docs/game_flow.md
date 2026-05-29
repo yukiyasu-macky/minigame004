@@ -109,31 +109,43 @@ Rules:
 
 Responsibility:
 
-- ハブ画面.
-- プレイ導線.
-- 契約確認.
-- 実績.
-- 設定.
-- 現在build確認.
+- Title後の出撃前ロビー.
+- 探索開始への導線.
+- レントとエムピーを見せる.
+- 魔力ゲージを見る.
+- 本日の依頼を軽く確認する.
+- 契約図鑑 / 実績 / ショップへの入口.
 
 Structure:
 
 ```txt
 - HomeScreen / home
-  ├ 現在build確認
-  │   ├ 現在キャラ / 固定キャラ
-  │   ├ 所持契約
-  │   ├ 現在利益
-  │   └ 現在借金
+  ├ 上部
+  │   ├ 魔力ゲージ
+  │   ├ お知らせ
+  │   ├ プレゼント
+  │   ├ ミッション
+  │   └ メニュー
   │
-  ├ プレイ導線
-  │   └ Mapへ進む
+  ├ 中央
+  │   ├ 冒険者Guild背景
+  │   ├ レント
+  │   └ エムピー
   │
-  ├ MENU
-  │   ├ 遊び方
+  ├ 左
+  │   └ 本日の依頼掲示板
+  │       ├ おすすめ依頼
+  │       ├ ピックアップ依頼
+  │       └ もっと見る
+  │
+  ├ 下
+  │   └ 探索開始
+  │
+  ├ 下部ナビ
+  │   ├ 冒険者
+  │   ├ 契約図鑑
   │   ├ 実績
-  │   ├ 設定
-  │   └ Ver表示
+  │   └ ショップ
   │
   └ MapScreenへ遷移
 ```
@@ -145,9 +157,10 @@ Navigation:
 
 Rules:
 
-- Home is the place for non-Battle utility.
+- Home is the pre-sortie lobby, not an economic dashboard.
 - Home may later host character/build changes.
 - Home should not interrupt Battle reward flow.
+- Home does not show current profit, current debt, predicted final profit, or debt overdrive. Those are Map / Battle responsibilities.
 
 ### Map
 
