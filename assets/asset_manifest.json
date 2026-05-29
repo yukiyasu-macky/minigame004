@@ -187,7 +187,13 @@
       "loop": false,
       "anchor": "center",
       "usage": "board_piece_normal",
-      "colors": ["blue", "green", "yellow", "red", "purple"],
+      "colors": [
+        "blue",
+        "green",
+        "yellow",
+        "red",
+        "purple"
+      ],
       "priority": "mvp",
       "prompt": "Horizontal strip of five 64x64 puzzle pieces: blue water drop, green leaf, yellow star/coin, red flame, purple swirl. Rounded square gem pieces, glossy pixel art, thick outline, transparent background."
     },
@@ -203,7 +209,13 @@
       "loop": false,
       "anchor": "center",
       "usage": "board_piece_selected",
-      "colors": ["blue", "green", "yellow", "red", "purple"],
+      "colors": [
+        "blue",
+        "green",
+        "yellow",
+        "red",
+        "purple"
+      ],
       "priority": "mvp",
       "prompt": "Horizontal strip of five 64x64 selected puzzle pieces with strong outer glow. Same icons and colors as normal pieces, cyan rim light and color-matched glow, pixel art, transparent background."
     },
@@ -219,7 +231,13 @@
       "loop": false,
       "anchor": "center",
       "usage": "board_piece_overdrive",
-      "colors": ["blue", "green", "yellow", "red", "purple"],
+      "colors": [
+        "blue",
+        "green",
+        "yellow",
+        "red",
+        "purple"
+      ],
       "priority": "mvp",
       "prompt": "Horizontal strip of five 64x64 overdrive puzzle pieces. Same five icons, stronger blue-purple additive glow, energetic pulse impression, still readable, transparent background."
     },
@@ -489,6 +507,126 @@
       "usage": "profit_debt_damage_heal_popup_frames",
       "priority": "nice_to_have",
       "prompt": "Horizontal strip of four 192x64 pixel number popup frames: profit green, debt magenta/red, damage yellow/orange, heal cyan. Empty center for dynamic numbers, transparent background."
+    },
+    {
+      "id": "title_bg_dungeon",
+      "category": "title",
+      "file": "assets/images/title/title_bg_dungeon.png",
+      "runtimeTarget": "public/assets/title/title_bg_dungeon.png",
+      "format": "png",
+      "background": "opaque",
+      "usage": "title_background",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Title bright stone dungeon background, cropped from title design sheet."
+    },
+    {
+      "id": "title_logo_greed_chain",
+      "category": "title",
+      "file": "assets/images/title/title_logo_greed_chain.png",
+      "runtimeTarget": "public/assets/title/title_logo_greed_chain.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_logo",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "GREED CHAIN logo crop from title design sheet; CSS logo remains primary for live text flexibility."
+    },
+    {
+      "id": "title_rent",
+      "category": "title",
+      "file": "assets/images/title/title_rent.png",
+      "runtimeTarget": "public/assets/title/title_rent.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_character",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Rent rear-facing invite pose, no weapon or chain."
+    },
+    {
+      "id": "title_mp",
+      "category": "title",
+      "file": "assets/images/title/title_mp.png",
+      "runtimeTarget": "public/assets/title/title_mp.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_character",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "MP small floating fairy title pose."
+    },
+    {
+      "id": "title_speech_bubble",
+      "category": "title",
+      "file": "assets/images/title/title_speech_bubble.png",
+      "runtimeTarget": "public/assets/title/title_speech_bubble.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Blank speech bubble frame for React text overlay."
+    },
+    {
+      "id": "title_start_text",
+      "category": "title",
+      "file": "assets/images/title/title_start_text.png",
+      "runtimeTarget": "public/assets/title/title_start_text.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Touch to start reference frame from design sheet."
+    },
+    {
+      "id": "title_ui_version_badge",
+      "category": "title",
+      "file": "assets/images/title/title_ui_version_badge.png",
+      "runtimeTarget": "public/assets/title/title_ui_version_badge.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Version badge reference from design sheet."
+    },
+    {
+      "id": "title_ui_notice_icon",
+      "category": "title",
+      "file": "assets/images/title/title_ui_notice_icon.png",
+      "runtimeTarget": "public/assets/title/title_ui_notice_icon.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Notice icon reference from design sheet."
+    },
+    {
+      "id": "title_ui_menu_icon",
+      "category": "title",
+      "file": "assets/images/title/title_ui_menu_icon.png",
+      "runtimeTarget": "public/assets/title/title_ui_menu_icon.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Menu icon reference from design sheet."
+    },
+    {
+      "id": "title_loading_panel",
+      "category": "title",
+      "file": "assets/images/title/title_loading_panel.png",
+      "runtimeTarget": "public/assets/title/title_loading_panel.png",
+      "format": "png",
+      "background": "transparent",
+      "usage": "title_ui",
+      "priority": "title_mvp",
+      "source": "ChatGPT Image 2026年5月29日 09_48_25.png",
+      "description": "Loading panel frame reference from design sheet."
     }
   ]
 }
